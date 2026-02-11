@@ -1,0 +1,31 @@
+[server]
+headless = true
+port = 8501
+enableCORS = false
+enableXsrfProtection = false
+maxUploadSize = 1024
+maxMessageSize = 1024
+runOnSave = false
+
+[browser]
+gatherUsageStats = false
+
+[runner]
+magicEnabled = false
+installTracer = false
+fixMatplotlib = true
+
+[theme]
+primaryColor = "#1e40af"
+backgroundColor = "#ffffff"
+secondaryBackgroundColor = "#f8fafc"
+textColor = "#1e293b"
+font = "sans serif"
+
+[logger]
+level = "warning"
+messageFormat = "%(asctime)s %(message)s"
+
+[client]
+showErrorDetails = false
+toolbarMode = "minimal"
