@@ -431,7 +431,9 @@ def _sync_flat_state_from_appstate():
 
         # other commonly used legacy keys
         for key in ('original_df', 'filename', 'column_profiles', 'quality_report',
-                    'exact_duplicates', 'fuzzy_duplicates', 'profiling_complete', 'processing_status', 'upload_progress'):
+                    'exact_duplicates', 'fuzzy_duplicates', 'profiling_complete', 
+                    'processing_status', 'upload_progress', 'fixes_applied', 
+                    'operation_count', 'last_operation'):
             try:
                 val = getattr(state, key, None)
                 if key not in st.session_state:

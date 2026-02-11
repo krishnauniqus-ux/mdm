@@ -12,18 +12,8 @@ from utils.text_processing import AdvancedTitleCase
 
 def update_dataframe(new_df: pd.DataFrame, operation: str):
     """Update dataframe and log operation"""
-    st.session_state.df = new_df.copy()
-    st.session_state.fixes_applied.append({
-        'timestamp': datetime.now().strftime("%H:%M:%S"),
-        'operation': operation,
-        'rows': len(new_df),
-        'columns': len(new_df.columns)
-    })
-    st.session_state.last_operation = operation
-    st.session_state.operation_count += 1
-    # Import here to avoid circular dependency
-    from state.session import recalculate_profiles
-    recalculate_profiles()
+    from state.session import update_dataframe as session_update_df
+    session_update_df(new_df, operation)
 
 
 def transform_standardize_columns(case: str):
