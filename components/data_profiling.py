@@ -1152,6 +1152,9 @@ def _analyze_special_chars_detailed(df):
     data = []
     for col in df.select_dtypes(include=['object']).columns:
         counter = Counter()
+    data = []
+    for col in df.select_dtypes(include=['object']).columns:
+        counter = Counter()
         for val in df[col].dropna().astype(str):
             for char in set(val):
                 if ord(char) > 127 or (not char.isalnum() and not char.isspace()):
@@ -1168,7 +1171,9 @@ def _analyze_special_chars_detailed(df):
 def _generate_excel_report():
     state = st.session_state.app_state
     progress = st.progress(0)
+    progress = st.progress(0)
     output = io.BytesIO()
+
 
     try:
         with pd.ExcelWriter(output, engine='openpyxl') as writer:
@@ -1268,6 +1273,11 @@ def _generate_json_report():
         df = state.df
         profiles = state.column_profiles
 
+
+    try:
+        df = state.df
+        profiles = state.column_profiles
+
         report = {
             'metadata': {
                 'generated_at': datetime.now().isoformat(),
@@ -1300,4 +1310,5 @@ def _generate_json_report():
         )
         show_toast("JSON report generated!", "success")
     except Exception as e:
+        st.error(f"Error generating JSON: {str(e)}")
         st.error(f"Error generating JSON: {str(e)}")
