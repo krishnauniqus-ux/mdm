@@ -54,13 +54,6 @@ class AzureOpenAIConfig:
 class AIValidationEngine:
     """Enterprise-grade AI-powered validation rule generator using Azure OpenAI"""
     
-    # Strict DQ Dimensions as per enterprise standards
-    DQ_DIMENSIONS = [
-        "Accuracy", "Completeness", "Consistency", "Validity", 
-        "Uniqueness", "Timeliness", "Integrity", "Conformity",
-        "Reliability", "Relevance", "Precision", "Accessibility"
-    ]
-    
     def __init__(self):
         self.client = None
         self.cache = {}  # Cache for validation rules to avoid repeated API calls
@@ -105,7 +98,7 @@ class AIValidationEngine:
             return None
     
     def analyze_column_semantic_type(self, column_name: str, sample_data: List[str], 
-                                    data_type: str, null_pct: float, unique_pct: float) -> Dict[str, Any]:
+                                    data_type: str) -> Dict[str, Any]:
         """Use AI to determine the semantic type and validation rules for a column"""
         
         cache_key = self._get_cache_key(column_name, sample_data, data_type)
@@ -113,95 +106,38 @@ class AIValidationEngine:
             return self.cache[cache_key]
         
         # Prepare sample data for AI analysis
-        samples = sample_data[:100] if sample_data else []
+        samples = sample_data[:20] if sample_data else []
         sample_str = json.dumps(samples, indent=2)
         
-        # HUMAN READABLE RULE PROMPT
-        prompt = f"""Analyze this data column and generate human-readable validation rules.
+        prompt = f"""Analyze this data column and provide intelligent validation rules.
 
-COLUMN INFORMATION
-==================
 Column Name: {column_name}
 Data Type: {data_type}
-Sample Values: {sample_str}
-Null Percentage: {null_pct:.1f}%
-Unique Percentage: {unique_pct:.1f}%
+Sample Values (first 20): {sample_str}
 
-REQUIRED OUTPUT FORMAT
-======================
-Return a JSON object with this exact structure:
+Analyze and return a JSON object with:
+1. semantic_type: What type of data this represents (e.g., "Email Address", "Phone Number", "Product Code", "Customer ID", "Date", "Currency", "Percentage", etc.)
+2. category: Broader category (Contact, Financial, Government ID, Technical, Date, Location, Product, Personal Info, etc.)
+3. country_context: Likely country/region context (India, USA, UK, Global, etc.)
+4. validation_rules: Array of validation objects with:
+   - rule_name: Name of the validation
+   - condition: Python regex pattern or logical condition
+   - condition_type: "regex", "range", "length", "enum", "custom"
+   - description: Human-readable description
+   - severity: "CRITICAL", "HIGH", "MEDIUM", "LOW"
+   - example_valid: Example of valid value
+   - example_invalid: Example of invalid value
+5. data_quality_checks: Array of DQ dimension checks (Completeness, Uniqueness, Validity, Consistency, Accuracy, Timeliness)
+6. confidence_score: 0-100 confidence in this classification
 
-{{
-  "business_field_name": "Human-friendly field name (e.g., 'Posting Date', 'Email Address', 'Mobile Number')",
-  "rules": [
-    {{
-      "dimension": "One of: Accuracy, Completeness, Consistency, Validity, Uniqueness, Timeliness, Integrity, Conformity, Reliability, Relevance, Precision, Accessibility",
-      "rule_statement": "Human readable rule in format: [Field Name] + Must/Should + Business Condition. Example: 'Posting Date must not be future dated'"
-    }}
-  ]
-}}
-
-RULE WRITING GUIDELINES
-=======================
-Write rules in this exact format: [Field Name] + Must/Should + Business Condition
-
-EXAMPLES BY FIELD TYPE:
-
-Date Fields (Date of Birth, Posting Date, Invoice Date):
-- Date of Birth must be a valid calendar date
-- Date of Birth cannot be in the future
-- Date of Birth cannot be more than 120 years in the past
-- Posting Date must not be future dated
-- Posting Date must be within the active financial period
-- Invoice Date should not be blank
-
-Email Fields (Email Address):
-- Email Address must follow standard email format
-- Email Address must contain @ symbol
-- Email Address must contain valid domain name
-- Email Address should not contain spaces
-- Email Address must be unique for each customer
-
-Phone Fields (Mobile Number, Phone):
-- Mobile Number must contain only digits
-- Mobile Number must have 10 digits
-- Mobile Number must start with valid prefix (6,7,8,9)
-- Mobile Number should not contain special characters
-
-ID Fields (PAN, GST, Asset ID):
-- PAN must follow government issued format
-- PAN must be 10 characters
-- PAN must be alphanumeric
-- Asset ID must follow organization coding standard
-
-Amount Fields (Amount, Cost, Price):
-- Amount must be numeric
-- Amount should not be negative
-- Amount must have maximum 2 decimal places
-- Amount should not exceed defined business limit
-
-Text Fields (Description, Name):
-- Description should not be blank
-- Description should not contain only special characters
-- Description should not contain generic values like "Test" or "NA"
-
-REQUIREMENTS
-============
-1. Generate 1-3 meaningful rules per column
-2. Use exact format: [Field Name] + Must/Should + Business Condition
-3. Rules must be immediately understandable by business users
-4. No technical jargon, regex, or code references
-5. Each rule should be actionable and specific
-6. Assign most appropriate DQ dimension
-
-Return ONLY valid JSON, no markdown."""
+Return ONLY valid JSON, no markdown formatting."""
 
         messages = [
-            {"role": "system", "content": "You are a Business Data Analyst who writes clear, human-readable data quality rules for enterprise systems. Return only JSON."},
+            {"role": "system", "content": "You are an expert data governance and validation specialist. Analyze data patterns and generate enterprise-grade validation rules. Return only valid JSON."},
             {"role": "user", "content": prompt}
         ]
         
-        response = self._call_azure_openai(messages, temperature=0.1)
+        response = self._call_azure_openai(messages)
         
         if response:
             try:
@@ -214,52 +150,18 @@ Return ONLY valid JSON, no markdown."""
                 st.warning(f"Failed to parse AI response for {column_name}: {str(e)}")
         
         # Fallback to basic analysis if AI fails
-        return self._fallback_analysis(column_name, sample_data, data_type, null_pct, unique_pct)
+        return self._fallback_analysis(column_name, sample_data, data_type)
     
     def _fallback_analysis(self, column_name: str, sample_data: List[str], 
-                          data_type: str, null_pct: float, unique_pct: float) -> Dict[str, Any]:
+                          data_type: str) -> Dict[str, Any]:
         """Basic fallback analysis when AI is unavailable"""
-        rules = []
-        field_name = column_name.replace('_', ' ').title()
-        
-        # Completeness rule for nulls
-        if null_pct > 0:
-            rules.append({
-                "dimension": "Completeness",
-                "rule_statement": f"{field_name} should not be blank or null"
-            })
-        
-        # Uniqueness rule for near-unique
-        if unique_pct >= 95:
-            rules.append({
-                "dimension": "Uniqueness",
-                "rule_statement": f"{field_name} must be unique"
-            })
-        
-        # Validity rule based on data type
-        if 'date' in data_type.lower():
-            rules.append({
-                "dimension": "Validity",
-                "rule_statement": f"{field_name} must be a valid calendar date"
-            })
-            rules.append({
-                "dimension": "Timeliness",
-                "rule_statement": f"{field_name} must not be future dated"
-            })
-        elif 'int' in data_type.lower() or 'float' in data_type.lower():
-            rules.append({
-                "dimension": "Validity",
-                "rule_statement": f"{field_name} must be numeric"
-            })
-        elif 'object' in data_type.lower():
-            rules.append({
-                "dimension": "Validity",
-                "rule_statement": f"{field_name} must contain valid text"
-            })
-        
         return {
-            "business_field_name": field_name,
-            "rules": rules
+            "semantic_type": "Unknown",
+            "category": "General",
+            "country_context": "Global",
+            "validation_rules": [],
+            "data_quality_checks": ["Completeness", "Uniqueness"],
+            "confidence_score": 0
         }
     
     def generate_dynamic_rules(self, df: pd.DataFrame, column_name: str, 
@@ -268,145 +170,157 @@ Return ONLY valid JSON, no markdown."""
         
         sample_data = df[column_name].dropna().astype(str).head(100).tolist()
         data_type = str(profile.dtype)
-        null_pct = profile.null_percentage
-        unique_pct = profile.unique_percentage
         
         # Get AI analysis
-        ai_analysis = self.analyze_column_semantic_type(column_name, sample_data, data_type, null_pct, unique_pct)
+        ai_analysis = self.analyze_column_semantic_type(column_name, sample_data, data_type)
         
         rules = []
-        field_name = ai_analysis.get('business_field_name', column_name)
+        
+        # Generate Column info
+        col_info = {
+            'Column': column_name,
+            'Dimension': 'Metadata',
+            'Type': 'AI_CLASSIFICATION',
+            'Condition': ai_analysis.get('semantic_type', 'Unknown'),
+            'Valid': 'N/A',
+            'Invalid': 'N/A',
+            'Example_Valid': ai_analysis.get('validation_rules', [{}])[0].get('example_valid', 'N/A') if ai_analysis.get('validation_rules') else 'N/A',
+            'Severity': 'INFO',
+            'Confidence': ai_analysis.get('confidence_score', 0),
+            'Category': ai_analysis.get('category', 'General'),
+            'Country': ai_analysis.get('country_context', 'Global')
+        }
+        rules.append(col_info)
         
         # Process AI-generated validation rules
-        for idx, rule in enumerate(ai_analysis.get('rules', [])):
-            # Validate dimension is in allowed list
-            dimension = rule.get('dimension', 'Validity')
-            if dimension not in self.DQ_DIMENSIONS:
-                dimension = 'Validity'
-            
+        for rule in ai_analysis.get('validation_rules', []):
             validation_rule = {
-                'S.No': len(rules) + 1,
                 'Column': column_name,
-                'Business Field': field_name,
-                'Dimension': dimension,
-                'Data Quality Rule': rule.get('rule_statement', 'No rule specified')
+                'Dimension': 'Validity',
+                'Type': rule.get('rule_name', 'VALIDATION'),
+                'Condition': rule.get('condition', ''),
+                'Valid': rule.get('example_valid', 'N/A'),
+                'Invalid': rule.get('example_invalid', 'N/A'),
+                'Example_Valid': rule.get('example_valid', 'N/A'),
+                'Severity': rule.get('severity', 'MEDIUM'),
+                'Condition_Type': rule.get('condition_type', 'custom'),
+                'Description': rule.get('description', ''),
+                'AI_Generated': True
             }
             rules.append(validation_rule)
+        
+        # Add standard DQ checks based on profile
+        if profile.null_percentage > 0:
+            rules.append({
+                'Column': column_name,
+                'Dimension': 'Completeness',
+                'Type': 'NOT_NULL',
+                'Condition': f'{column_name} IS NOT NULL',
+                'Valid': 'Any non-null value',
+                'Invalid': 'NULL/NaN',
+                'Example_Valid': str(sample_data[0]) if sample_data else 'N/A',
+                'Severity': 'CRITICAL' if profile.null_percentage > 20 else 'HIGH' if profile.null_percentage > 5 else 'MEDIUM',
+                'Null_Percentage': profile.null_percentage
+            })
+        
+        # Uniqueness check for near-unique columns
+        unique_pct = profile.unique_percentage
+        if 95 <= unique_pct < 100:
+            dup_count = profile.total_rows - profile.unique_count
+            rules.append({
+                'Column': column_name,
+                'Dimension': 'Uniqueness',
+                'Type': 'UNIQUE_CHECK',
+                'Condition': f'{column_name} must be unique',
+                'Valid': 'Unique values only',
+                'Invalid': f'Duplicate values ({dup_count} found)',
+                'Example_Valid': 'Single occurrence per value',
+                'Severity': 'HIGH',
+                'Duplicate_Count': dup_count,
+                'Unique_Percentage': unique_pct
+            })
+        
+        # Length validation for text columns
+        if 'object' in str(profile.dtype):
+            min_len = getattr(profile, 'min_length', 0)
+            max_len = getattr(profile, 'max_length', 0)
+            if max_len > 0:
+                rules.append({
+                    'Column': column_name,
+                    'Dimension': 'Validity',
+                    'Type': 'LENGTH_CHECK',
+                    'Condition': f'Length between {min_len} and {max_len} characters',
+                    'Valid': f'Text length {min_len}-{max_len}',
+                    'Invalid': f'Length outside range',
+                    'Example_Valid': f'Mid-range length (~{(min_len+max_len)//2})',
+                    'Severity': 'MEDIUM' if (max_len - min_len) > 50 else 'LOW',
+                    'Min_Length': min_len,
+                    'Max_Length': max_len
+                })
         
         return rules
     
     def validate_data_against_rules(self, df: pd.DataFrame, rules: List[Dict]) -> pd.DataFrame:
-        """Validate dataframe against AI-generated rules and return results with examples"""
+        """Validate dataframe against AI-generated rules and return results"""
         validation_results = []
         
         for rule in rules:
+            if rule.get('Type') in ['AI_CLASSIFICATION', 'INFO']:
+                continue
+                
             column = rule.get('Column')
             if column not in df.columns:
                 continue
             
-            rule_statement = rule.get('Data Quality Rule', '').lower()
+            condition_type = rule.get('Condition_Type', 'custom')
+            condition = rule.get('Condition', '')
+            
+            valid_count = 0
             invalid_count = 0
-            invalid_examples = []  # Store examples of invalid values
+            invalid_samples = []
             
-            # Simple validation logic based on rule statement keywords
-            try:
-                if 'not be blank' in rule_statement or 'not be null' in rule_statement:
-                    mask = df[column].isna()
-                    invalid_count = mask.sum()
-                    invalid_examples = df[mask][column].head(5).tolist()
-                
-                elif 'unique' in rule_statement:
-                    mask = df[column].duplicated(keep=False)
-                    invalid_count = mask.sum()
-                    # Get duplicate values and their counts
-                    dup_values = df[mask][column].value_counts().head(3)
-                    invalid_examples = [f"{val} ({count} times)" for val, count in dup_values.items()]
-                
-                elif 'valid calendar date' in rule_statement or 'valid date' in rule_statement:
-                    converted = pd.to_datetime(df[column], errors='coerce')
-                    mask = converted.isna() & df[column].notna()
-                    invalid_count = mask.sum()
-                    invalid_examples = df[mask][column].head(5).astype(str).tolist()
-                
-                elif 'not be future dated' in rule_statement or 'not be in the future' in rule_statement:
-                    try:
-                        dates = pd.to_datetime(df[column], errors='coerce')
-                        mask = dates > datetime.now()
-                        invalid_count = mask.sum()
-                        invalid_examples = df[mask][column].head(5).astype(str).tolist()
-                    except:
-                        invalid_count = 0
-                
-                elif 'numeric' in rule_statement:
-                    converted = pd.to_numeric(df[column], errors='coerce')
-                    mask = converted.isna() & df[column].notna()
-                    invalid_count = mask.sum()
-                    invalid_examples = df[mask][column].head(5).astype(str).tolist()
-                
-                elif 'not be negative' in rule_statement:
-                    try:
-                        numeric_vals = pd.to_numeric(df[column], errors='coerce')
-                        mask = numeric_vals < 0
-                        invalid_count = mask.sum()
-                        invalid_examples = df[mask][column].head(5).astype(str).tolist()
-                    except:
-                        invalid_count = 0
-                
-                elif 'only digits' in rule_statement:
-                    mask = ~df[column].astype(str).str.match(r'^\d+$')
-                    invalid_count = mask.sum()
-                    invalid_examples = df[mask][column].head(5).astype(str).tolist()
-                
-                elif '10 digits' in rule_statement or '10 characters' in rule_statement:
-                    mask = ~df[column].astype(str).str.len().eq(10)
-                    invalid_count = mask.sum()
-                    invalid_examples = df[mask][column].head(5).astype(str).tolist()
-                
-                elif 'email' in rule_statement:
-                    email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
-                    mask = ~df[column].astype(str).str.match(email_pattern)
-                    invalid_count = mask.sum()
-                    invalid_examples = df[mask][column].head(5).astype(str).tolist()
-                
-                elif 'alphanumeric' in rule_statement:
-                    mask = ~df[column].astype(str).str.match(r'^[a-zA-Z0-9]+$')
-                    invalid_count = mask.sum()
-                    invalid_examples = df[mask][column].head(5).astype(str).tolist()
-                
-                elif 'not contain' in rule_statement and 'special' in rule_statement:
-                    mask = df[column].astype(str).str.contains(r'[^a-zA-Z0-9\s]', regex=True, na=False)
-                    invalid_count = mask.sum()
-                    invalid_examples = df[mask][column].head(5).astype(str).tolist()
-                
-                else:
-                    # Generic pattern matching for other rules
-                    invalid_count = 0
-                    invalid_examples = []
-                    
-            except Exception as e:
-                invalid_count = 0
-                invalid_examples = []
+            if condition_type == 'regex' and condition:
+                try:
+                    pattern = re.compile(condition)
+                    for idx, value in df[column].dropna().astype(str).items():
+                        if pattern.match(value.strip()):
+                            valid_count += 1
+                        else:
+                            invalid_count += 1
+                            if len(invalid_samples) < 5:
+                                invalid_samples.append(value[:50])
+                except re.error:
+                    pass
             
-            # Format examples for display
-            if invalid_count == 0:
-                examples_str = "✓ All values valid - No issues found"
-            elif invalid_examples:
-                # Clean and truncate examples
-                cleaned_examples = []
-                for ex in invalid_examples:
-                    ex_str = str(ex).strip()
-                    if len(ex_str) > 50:
-                        ex_str = ex_str[:47] + "..."
-                    cleaned_examples.append(ex_str)
-                examples_str = "; ".join(cleaned_examples)
-            else:
-                examples_str = f"{invalid_count} issues found (examples not captured)"
+            elif rule.get('Type') == 'NOT_NULL':
+                valid_count = df[column].notna().sum()
+                invalid_count = df[column].isna().sum()
+            
+            elif rule.get('Type') == 'UNIQUE_CHECK':
+                value_counts = df[column].value_counts()
+                valid_count = (value_counts == 1).sum()
+                invalid_count = (value_counts > 1).sum()
+            
+            elif rule.get('Type') == 'LENGTH_CHECK':
+                min_len = rule.get('Min_Length', 0)
+                max_len = rule.get('Max_Length', 999999)
+                lengths = df[column].dropna().astype(str).str.len()
+                valid_count = ((lengths >= min_len) & (lengths <= max_len)).sum()
+                invalid_count = ((lengths < min_len) | (lengths > max_len)).sum()
+            
+            total = valid_count + invalid_count
+            coverage = (valid_count / total * 100) if total > 0 else 0
             
             validation_results.append({
                 'Column': column,
+                'Rule_Type': rule.get('Type'),
                 'Dimension': rule.get('Dimension'),
-                'Invalid_Count': int(invalid_count),
-                'Issues_Found_Example': examples_str
+                'Valid_Count': valid_count,
+                'Invalid_Count': invalid_count,
+                'Coverage_Percent': round(coverage, 2),
+                'Invalid_Samples': invalid_samples,
+                'Severity': rule.get('Severity', 'MEDIUM'),
+                'Condition': condition
             })
         
         return pd.DataFrame(validation_results)
@@ -458,27 +372,40 @@ class DynamicValidationDetector:
         # Validate data against rules
         validation_results = self.ai_engine.validate_data_against_rules(df, all_rules)
         
-        # Create comprehensive output - HUMAN READABLE FORMAT
+        # Create comprehensive output
         output_data = []
-        for idx, rule in enumerate(all_rules, 1):
+        for rule in all_rules:
             # Find matching validation result
             match = validation_results[
                 (validation_results['Column'] == rule.get('Column')) & 
-                (validation_results['Dimension'] == rule.get('Dimension'))
+                (validation_results['Rule_Type'] == rule.get('Type'))
             ]
             
-            invalid_count = match.iloc[0]['Invalid_Count'] if not match.empty else 0
-            issues_example = match.iloc[0]['Issues_Found_Example'] if not match.empty else "✓ All values valid - No issues found"
-            
             row = {
-                'S.No': idx,
                 'Column': rule.get('Column'),
-                'Business Field': rule.get('Business Field'),
                 'Dimension': rule.get('Dimension'),
-                'Data Quality Rule': rule.get('Data Quality Rule'),
-                'Issues Found': invalid_count,
-                'Issues Found Example': issues_example
+                'Type': rule.get('Type'),
+                'Condition': rule.get('Condition'),
+                'Valid': rule.get('Valid', 'N/A'),
+                'Invalid': rule.get('Invalid', 'N/A'),
+                'Example_Valid': rule.get('Example_Valid', 'N/A'),
+                'Severity': rule.get('Severity', 'MEDIUM'),
+                'AI_Generated': rule.get('AI_Generated', False),
+                'Category': rule.get('Category', 'General'),
+                'Country': rule.get('Country', 'Global'),
+                'Confidence': rule.get('Confidence', 0)
             }
+            
+            if not match.empty:
+                row['Valid_Count'] = match.iloc[0]['Valid_Count']
+                row['Invalid_Count'] = match.iloc[0]['Invalid_Count']
+                row['Coverage_Percent'] = match.iloc[0]['Coverage_Percent']
+                row['Invalid_Samples'] = ', '.join(match.iloc[0]['Invalid_Samples'][:3])
+            else:
+                row['Valid_Count'] = 'N/A'
+                row['Invalid_Count'] = 'N/A'
+                row['Coverage_Percent'] = 'N/A'
+                row['Invalid_Samples'] = 'N/A'
             
             output_data.append(row)
         
@@ -730,6 +657,7 @@ def render_data_profiling():
 
     _remove_ghost_columns()
 
+    st.set_page_config(page_title="AI Data Profiler", layout="wide")
 
     # Executive Dashboard
     _render_executive_dashboard()
@@ -740,6 +668,7 @@ def render_data_profiling():
         "📋 Column Profiles", 
         "🤖 AI Validations", 
         "🎯 Match Rules", 
+        "⚠️ Quality Issues", 
         "📥 Export"
     ])
 
@@ -752,6 +681,8 @@ def render_data_profiling():
     with tabs[3]: 
         _render_match_rules_tab()
     with tabs[4]: 
+        _render_issues_tab()
+    with tabs[5]: 
         _render_export_tab()
 
 
@@ -900,72 +831,52 @@ def _render_profiles_tab():
     st.write(f"Showing {len(filtered)} of {len(profiles)} columns")
 
     # Display as cards
-    # show collabsible in grid view
-    
-    cols_per_row = 2
-    items = list(filtered.items())[:30]
+    for col, prof in list(filtered.items())[:30]:
+        with st.expander(f"📊 {col} | {prof.dtype} | Quality: {100-prof.null_percentage:.0f}%"):
+            c1, c2, c3, c4 = st.columns(4)
 
-    for i in range(0, len(items), cols_per_row):
+            with c1:
+                st.markdown("**Volume**")
+                st.write(f"Rows: {prof.total_rows:,}")
+                st.write(f"Non-null: {getattr(prof, 'non_null_count', prof.total_rows - prof.null_count):,}")
+                st.write(f"Null: {prof.null_count:,} ({prof.null_percentage:.1f}%)")
 
-        cols = st.columns(cols_per_row)
+            with c2:
+                st.markdown("**Uniqueness**")
+                dup = prof.total_rows - prof.unique_count
+                st.write(f"Unique: {prof.unique_count:,}")
+                st.write(f"Duplicates: {dup:,}")
+                st.write(f"Unique %: {prof.unique_percentage:.1f}%")
 
-        for col_ui, (col, prof) in zip(cols, items[i:i+cols_per_row]):
+            with c3:
+                st.markdown("**Length**")
+                st.write(f"Min: {getattr(prof, 'min_length', 'N/A')}")
+                st.write(f"Max: {getattr(prof, 'max_length', 'N/A')}")
+                st.write(f"Avg: {getattr(prof, 'avg_length', 0):.1f}")
 
-            with col_ui:
+            with c4:
+                st.markdown("**Risk**")
+                risk = getattr(prof, 'risk_level', 'Low')
+                color = "🔴" if risk == "High" else "🟡" if risk == "Medium" else "🟢"
+                st.write(f"Level: {color} {risk}")
+                st.write(f"Score: {getattr(prof, 'risk_score', 0)}/100")
 
-                with st.expander(
-                    f"📊 {col} | {prof.dtype} | Quality: {100-prof.null_percentage:.0f}%"
-                ):
-
-                    c1, c2, c3, c4 = st.columns(4)
-
-                    # Volume
-                    with c1:
-                        st.markdown("**Volume**")
-                        st.write(f"Rows: {prof.total_rows:,}")
-                        st.write(f"Non-null: {getattr(prof, 'non_null_count', prof.total_rows - prof.null_count):,}")
-                        st.write(f"Null: {prof.null_count:,} ({prof.null_percentage:.1f}%)")
-
-                    # Uniqueness
-                    with c2:
-                        st.markdown("**Uniqueness**")
-                        dup = prof.total_rows - prof.unique_count
-                        st.write(f"Unique: {prof.unique_count:,}")
-                        st.write(f"Duplicates: {dup:,}")
-                        st.write(f"Unique %: {prof.unique_percentage:.1f}%")
-
-                    # Length
-                    with c3:
-                        st.markdown("**Length**")
-                        st.write(f"Min: {getattr(prof, 'min_length', 'N/A')}")
-                        st.write(f"Max: {getattr(prof, 'max_length', 'N/A')}")
-                        st.write(f"Avg: {getattr(prof, 'avg_length', 0):.1f}")
-
-                    # Risk
-                    with c4:
-                        st.markdown("**Risk**")
-                        risk = getattr(prof, 'risk_level', 'Low')
-                        color = "🔴" if risk == "High" else "🟡" if risk == "Medium" else "🟢"
-                        st.write(f"Level: {color} {risk}")
-                        st.write(f"Score: {getattr(prof, 'risk_score', 0)}/100")
-
-                    # Duplicate analysis (nested collapsible)
-                    if prof.unique_count < prof.total_rows:
-                        dups = find_duplicate_groups(df, col)
-                        if dups:
-                            with st.expander(f"⚠️ Duplicates ({len(dups)} groups)"):
-                                for d in dups[:5]:
-                                    st.write(
-                                        f"- Value '{d['value'][:30]}' "
-                                        f"appears {d['count']} times ({d['percentage']}%)"
-                                    )
+            # Duplicate analysis
+            if prof.unique_count < prof.total_rows:
+                dups = find_duplicate_groups(df, col)
+                if dups:
+                    with st.expander(f"⚠️ Duplicates ({len(dups)} groups)"):
+                        for d in dups[:5]:
+                            st.write(f"- Value '{d['value'][:30]}' appears {d['count']} times ({d['percentage']}%)")
 
 
 def _render_ai_validations_tab():
-    """NEW: AI-Powered Validations Tab - HUMAN READABLE FORMAT"""
+    """NEW: AI-Powered Validations Tab"""
     state = st.session_state.app_state
     df = state.df
     profiles = state.column_profiles
+    
+    st.subheader("🤖 AI-Powered Data Validation Rules")
     
     # Check Azure OpenAI configuration
     missing_config = AzureOpenAIConfig.validate()
@@ -974,121 +885,136 @@ def _render_ai_validations_tab():
         st.info("Please set these in your Streamlit secrets or environment variables.")
         return
     
-    # Rules are now stored in state.ai_validation_rules and state.ai_validation_rules_generated
+    if st.button("🚀 Generate AI Validation Rules", type="primary"):
+        with st.spinner("🤖 Analyzing data with Azure OpenAI..."):
+            detector = DynamicValidationDetector()
+            validation_df = detector.generate_comprehensive_dq_rules(df, profiles)
+            
+            # Store in session state
+            state.ai_validation_rules = validation_df
+            
+            st.success(f"✅ Generated {len(validation_df)} validation rules!")
     
-    col1, col2 = st.columns([1, 3])
-    with col1:
-        if not state.ai_validation_rules_generated:
-            if st.button("🚀 Generate AI Validation Rules", type="primary"):
-                with st.spinner("🤖 Analyzing data with Azure OpenAI..."):
-                    detector = DynamicValidationDetector()
-                    validation_df = detector.generate_comprehensive_dq_rules(df, profiles)
-                    
-                    # Store in state for persistence
-                    state.ai_validation_rules = validation_df
-                    state.ai_validation_rules_generated = True
-                    
-                    # Explicitly save to disk
-                    from state.session import _save_persisted_data
-                    _save_persisted_data()
-                    
-                    st.success(f"✅ Generated {len(validation_df)} validation rules!")
-                    st.rerun()
-        else:
-            if st.button("🗑️ Clear Generated Rules", type="secondary"):
-                state.ai_validation_rules_generated = False
-                state.ai_validation_rules = pd.DataFrame()
-                
-                # Explicitly save to disk
-                from state.session import _save_persisted_data
-                _save_persisted_data()
-                st.rerun()
-    
-    
-    # Use state data for display
-    if state.ai_validation_rules_generated and state.ai_validation_rules is not None and not state.ai_validation_rules.empty:
+    if hasattr(state, 'ai_validation_rules') and not state.ai_validation_rules.empty:
         validation_df = state.ai_validation_rules
-        # Show record count
-        st.caption(f"Showing {len(validation_df)} validation rules")
         
-        # Filter by Dimension
-        available_dims = validation_df['Dimension'].unique().tolist()
-        selected_dims = st.multiselect(
-            "Filter by DQ Dimension", 
-            available_dims, 
-            default=available_dims
-        )
+        # Summary metrics
+        ai_generated = validation_df[validation_df['AI_Generated'] == True]
+        st.metric("AI-Generated Rules", len(ai_generated))
         
-        if selected_dims:
-            filtered_df = validation_df[validation_df['Dimension'].isin(selected_dims)]
-        else:
-            filtered_df = validation_df
+        # Filter options
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            dim_filter = st.multiselect("Dimension", validation_df['Dimension'].unique())
+        with col2:
+            sev_filter = st.multiselect("Severity", validation_df['Severity'].unique())
+        with col3:
+            cat_filter = st.multiselect("Category", validation_df['Category'].unique())
         
-        # Display columns - CLEAN HUMAN READABLE WITH EXAMPLES
-        display_cols = ['S.No', 'Business Field', 'Dimension', 'Data Quality Rule', 'Issues Found', 'Issues Found Example']
+        # Apply filters
+        filtered_df = validation_df.copy()
+        if dim_filter:
+            filtered_df = filtered_df[filtered_df['Dimension'].isin(dim_filter)]
+        if sev_filter:
+            filtered_df = filtered_df[filtered_df['Severity'].isin(sev_filter)]
+        if cat_filter:
+            filtered_df = filtered_df[filtered_df['Category'].isin(cat_filter)]
+        
+        # Display validation rules table
+        st.subheader("Validation Rules")
+        
+        # Reorder columns for better display
+        display_cols = [
+            'Column', 'Dimension', 'Type', 'Condition', 'Valid', 'Invalid', 
+            'Example_Valid', 'Severity', 'AI_Generated', 'Category', 'Country',
+            'Valid_Count', 'Invalid_Count', 'Coverage_Percent'
+        ]
+        
+        # Only include columns that exist
         display_cols = [c for c in display_cols if c in filtered_df.columns]
         
-        # Style the dataframe
-        def highlight_issues(val):
-            if isinstance(val, int) and val > 0:
-                return 'background-color: #fee2e2; color: #991b1b; font-weight: bold;'
+        # Color coding for severity
+        def color_severity(val):
+            if isinstance(val, str):
+                colors = {
+                    'CRITICAL': 'background-color: #dc2626; color: white',
+                    'HIGH': 'background-color: #ea580c; color: white',
+                    'MEDIUM': 'background-color: #ca8a04; color: white',
+                    'LOW': 'background-color: #16a34a; color: white'
+                }
+                return colors.get(val, '')
             return ''
         
-        def highlight_examples(val):
-            if isinstance(val, str) and val.startswith('✓'):
-                return 'background-color: #dcfce7; color: #166534; font-size: 11px; font-style: italic;'
-            elif isinstance(val, str) and len(val) > 0:
-                return 'background-color: #fef3c7; color: #92400e; font-size: 11px;'
-            return ''
+        styled_df = filtered_df[display_cols].style.applymap(
+            color_severity, subset=['Severity'] if 'Severity' in display_cols else []
+        )
         
-        def highlight_dimension(val):
-            colors = {
-                'Accuracy': 'background-color: #dbeafe; color: #1e40af',
-                'Completeness': 'background-color: #dcfce7; color: #166534',
-                'Consistency': 'background-color: #fef3c7; color: #92400e',
-                'Validity': 'background-color: #fce7f3; color: #9d174d',
-                'Uniqueness': 'background-color: #f3e8ff; color: #6b21a8',
-                'Timeliness': 'background-color: #ccfbf1; color: #0f766e',
-                'Integrity': 'background-color: #fee2e2; color: #991b1b',
-                'Conformity': 'background-color: #e0e7ff; color: #3730a3',
-                'Reliability': 'background-color: #ffedd5; color: #9a3412',
-                'Relevance': 'background-color: #ecfccb; color: #3f6212',
-                'Precision': 'background-color: #fae8ff; color: #86198f',
-                'Accessibility': 'background-color: #e0f2fe; color: #075985'
-            }
-            return colors.get(val, '')
+        st.dataframe(styled_df, use_container_width=True, height=600)
         
-        # Apply styling and display - use actual row count for height
-        row_count = len(filtered_df)
-        # Calculate height: min 100px, max 600px, approx 35px per row
-        table_height = min(max(row_count * 35 + 50, 100), 600)
+        # Visualization of validation coverage
+        st.subheader("Validation Coverage Analysis")
         
-        styled_df = filtered_df[display_cols].style\
-            .applymap(highlight_dimension, subset=['Dimension'])\
-            .applymap(highlight_issues, subset=['Issues Found'])\
-            .applymap(highlight_examples, subset=['Issues Found Example'])
+        if 'Coverage_Percent' in filtered_df.columns:
+            # FIX: Convert Coverage_Percent to numeric, coercing errors to NaN
+            coverage_data = filtered_df.copy()
+            coverage_data['Coverage_Percent_Numeric'] = pd.to_numeric(
+                coverage_data['Coverage_Percent'], 
+                errors='coerce'
+            )
+            
+            # Filter out rows where Coverage_Percent could not be converted to a number
+            coverage_data = coverage_data.dropna(subset=['Coverage_Percent_Numeric'])
+            
+            if not coverage_data.empty:
+                # FIX: Ensure Valid_Count and Invalid_Count are also numeric for hover_data
+                for col in ['Valid_Count', 'Invalid_Count']:
+                    if col in coverage_data.columns:
+                        coverage_data[col] = pd.to_numeric(coverage_data[col], errors='coerce')
+                
+                fig = px.scatter(
+                    coverage_data, 
+                    x='Column', 
+                    y='Type',
+                    size='Coverage_Percent_Numeric',  # Use the numeric column
+                    color='Severity',
+                    hover_data=['Valid_Count', 'Invalid_Count', 'Coverage_Percent'],
+                    title="Validation Coverage by Column and Rule Type",
+                    size_max=50  # Limit max bubble size
+                )
+                fig.update_layout(xaxis_tickangle=-45)
+                st.plotly_chart(fig, use_container_width=True)
+            else:
+                st.info("No numeric coverage data available for visualization")
         
-        st.dataframe(styled_df, use_container_width=True, height=table_height)
-        
-        # Summary statistics
-        dim_counts = filtered_df['Dimension'].value_counts().reset_index()
-        dim_counts.columns = ['Dimension', 'Rule Count']
-        
-        col1, col2 = st.columns(2)
-        with col1:
-            fig = px.bar(dim_counts, x='Dimension', y='Rule Count', 
-                        color='Dimension', title="Rules by DQ Dimension")
-            st.plotly_chart(fig, use_container_width=True)
-        
-        with col2:
-            fig = px.pie(dim_counts, values='Rule Count', names='Dimension',
-                        title="DQ Dimension Distribution")
-            st.plotly_chart(fig, use_container_width=True)
-        
-
+        # AI Confidence Distribution
+        if 'Confidence' in filtered_df.columns:
+            conf_data = filtered_df[filtered_df['AI_Generated'] == True].copy()
+            
+            # FIX: Convert Confidence to numeric
+            conf_data['Confidence_Numeric'] = pd.to_numeric(
+                conf_data['Confidence'], 
+                errors='coerce'
+            )
+            conf_data = conf_data.dropna(subset=['Confidence_Numeric'])
+            
+            if not conf_data.empty:
+                fig = px.histogram(
+                    conf_data, 
+                    x='Confidence_Numeric',  # Use numeric column
+                    nbins=10,
+                    title="AI Confidence Score Distribution",
+                    color='Category',
+                    labels={'Confidence_Numeric': 'Confidence Score'}
+                )
+                st.plotly_chart(fig, use_container_width=True)
+            else:
+                st.info("No numeric confidence data available for visualization")
 
 def _render_match_rules_tab():
     state = st.session_state.app_state
+
+    st.subheader("🎯 Match Rule Suggestions")
+
     rules = generate_match_rules(state.df, state.column_profiles)
 
     if not rules:
@@ -1098,6 +1024,19 @@ def _render_match_rules_tab():
     # Rule distribution
     types = {}
     probs = {}
+    for r in rules:
+        types[r['Rule Type']] = types.get(r['Rule Type'], 0) + 1
+        probs[r['Match Probability']] = probs.get(r['Match Probability'], 0) + 1
+
+    col1, col2 = st.columns(2)
+    with col1:
+        fig = px.pie(values=list(types.values()), names=list(types.keys()), title="Rule Types")
+        st.plotly_chart(fig, use_container_width=True)
+
+    with col2:
+        fig = px.bar(x=list(probs.keys()), y=list(probs.values()), title="Match Probability Distribution",
+                    color=list(probs.keys()), color_discrete_sequence=px.colors.sequential.Viridis)
+        st.plotly_chart(fig, use_container_width=True)
 
     # Rules table
     st.subheader("Suggested Match Rules")
@@ -1126,6 +1065,82 @@ def _render_match_rules_tab():
             st.write(f"**Rationale:** {rule['Rationale']}")
 
 
+def _render_issues_tab():
+    state = st.session_state.app_state
+
+    st.subheader("⚠️ Data Quality Issues")
+
+    # Use AI-generated rules if available, otherwise generate on the fly
+    if hasattr(state, 'ai_validation_rules') and not state.ai_validation_rules.empty:
+        dq_rules = state.ai_validation_rules[
+            state.ai_validation_rules['Dimension'] != 'Metadata'
+        ].to_dict('records')
+    else:
+        st.info("Generate AI validation rules first to see detailed quality issues")
+        return
+
+    if not dq_rules:
+        st.success("✅ No quality issues detected!")
+        return
+
+    # Severity distribution
+    sev_counts = {'CRITICAL': 0, 'HIGH': 0, 'MEDIUM': 0, 'LOW': 0}
+    for r in dq_rules:
+        sev = r.get('Severity', 'MEDIUM')
+        sev_counts[sev] = sev_counts.get(sev, 0) + 1
+
+    col1, col2 = st.columns([1, 2])
+
+    with col1:
+        fig = px.pie(
+            values=list(sev_counts.values()), 
+            names=list(sev_counts.keys()),
+            title="Issues by Severity",
+            color=list(sev_counts.keys()),
+            color_discrete_map={
+                'CRITICAL': '#dc2626', 
+                'HIGH': '#ea580c', 
+                'MEDIUM': '#ca8a04', 
+                'LOW': '#16a34a'
+            }
+        )
+        st.plotly_chart(fig, use_container_width=True)
+
+    with col2:
+        # Issues by dimension
+        dim_counts = {}
+        for r in dq_rules:
+            dim = r.get('Dimension', 'Other')
+            dim_counts[dim] = dim_counts.get(dim, 0) + 1
+        fig = px.bar(
+            x=list(dim_counts.keys()), 
+            y=list(dim_counts.values()),
+            title="Issues by DQ Dimension", 
+            color=list(dim_counts.keys())
+        )
+        st.plotly_chart(fig, use_container_width=True)
+
+    # Issues table
+    st.subheader("Quality Rules & Actions")
+    issues_df = pd.DataFrame(dq_rules)
+
+    def color_severity(val):
+        colors = {
+            'CRITICAL': '#dc2626', 
+            'HIGH': '#ea580c', 
+            'MEDIUM': '#ca8a04', 
+            'LOW': '#16a34a'
+        }
+        return f'background-color: {colors.get(val, "gray")}; color: white'
+
+    display_cols = ['Column', 'Dimension', 'Type', 'Severity', 'Valid', 'Invalid', 'Example_Valid']
+    display_cols = [c for c in display_cols if c in issues_df.columns]
+    
+    styled = issues_df[display_cols].style.applymap(
+        color_severity, 
+        subset=['Severity'] if 'Severity' in display_cols else []
+    )
+    st.dataframe(styled, use_container_width=True, hide_index=True)
 
 
 def _render_export_tab():
@@ -1216,33 +1231,36 @@ def _generate_excel_report():
             (pd.DataFrame(chars) if chars else pd.DataFrame({'Message': ['No special characters found']})).to_excel(
                 writer, sheet_name='Special Characters', index=False)
 
-            # 4. AI Validation Rules - HUMAN READABLE FORMAT WITH EXAMPLES
+            # 4. AI Validation Rules (NEW - Replaces Pattern Found)
             progress.progress(55)
-            if state.ai_validation_rules_generated and state.ai_validation_rules is not None and not state.ai_validation_rules.empty:
+            if hasattr(state, 'ai_validation_rules') and not state.ai_validation_rules.empty:
+                # Reorder columns for better readability
                 validation_df = state.ai_validation_rules.copy()
-                # Clean column order - HUMAN READABLE WITH EXAMPLES
-                col_order = ['S.No', 'Business Field', 'Dimension', 'Data Quality Rule', 'Issues Found', 'Issues Found Example']
+                col_order = [
+                    'Column', 'Dimension', 'Type', 'Condition', 'Valid', 'Invalid',
+                    'Example_Valid', 'Severity', 'Category', 'Country', 'AI_Generated',
+                    'Confidence', 'Valid_Count', 'Invalid_Count', 'Coverage_Percent'
+                ]
+                # Only include columns that exist
                 col_order = [c for c in col_order if c in validation_df.columns]
                 validation_df = validation_df[col_order]
-                validation_df.to_excel(writer, sheet_name='Data Quality Rules', index=False)
+                validation_df.to_excel(writer, sheet_name='AI Validation Rules', index=False)
             else:
                 pd.DataFrame({'Message': ['No AI validation rules generated. Run validation analysis first.']}).to_excel(
-                    writer, sheet_name='Data Quality Rules', index=False)
+                    writer, sheet_name='AI Validation Rules', index=False)
 
             # 5. Match Rule Suggestion
             progress.progress(75)
             match_rules = generate_match_rules(df, profiles)
-            pd.DataFrame(match_rules).to_excel(writer, sheet_name='Match Rules', index=False)
+            pd.DataFrame(match_rules).to_excel(writer, sheet_name='Match Rule Suggestion', index=False)
 
-            # 6. DQ Dimension Summary
+            # 6. Data Quality Summary
             progress.progress(90)
-            if state.ai_validation_rules_generated and state.ai_validation_rules is not None and not state.ai_validation_rules.empty:
-                dq_summary = state.ai_validation_rules.groupby('Dimension').agg({
-                    'S.No': 'count',
-                    'Issues Found': 'sum'
-                }).reset_index()
-                dq_summary.columns = ['Dimension', 'Rule Count', 'Total Issues']
-                dq_summary = dq_summary.sort_values('Rule Count', ascending=False)
+            if hasattr(state, 'ai_validation_rules') and not state.ai_validation_rules.empty:
+                # Create summary by dimension and severity
+                dq_summary = state.ai_validation_rules.groupby(
+                    ['Dimension', 'Severity']
+                ).size().reset_index(name='Rule Count')
                 dq_summary.to_excel(writer, sheet_name='DQ Summary', index=False)
             else:
                 pd.DataFrame({'Message': ['No data quality analysis available']}).to_excel(
@@ -1273,8 +1291,7 @@ def _generate_json_report():
                 'generated_at': datetime.now().isoformat(),
                 'total_rows': len(df),
                 'total_columns': len(df.columns),
-                'ai_powered': True,
-                'dq_dimensions': AIValidationEngine.DQ_DIMENSIONS
+                'ai_powered': True
             },
             'executive_summary': {
                 'missing_cells': sum(p.null_count for p in profiles.values()),
@@ -1288,14 +1305,14 @@ def _generate_json_report():
                     'duplicate_count': p.total_rows - p.unique_count
                 } for col, p in profiles.items()
             },
-            'data_quality_rules': state.ai_validation_rules.to_dict('records') if state.ai_validation_rules_generated and state.ai_validation_rules is not None else [],
+            'ai_validation_rules': state.ai_validation_rules.to_dict('records') if hasattr(state, 'ai_validation_rules') else [],
             'match_rules': generate_match_rules(df, profiles)
         }
 
         st.download_button(
             "⬇️ Download JSON Report", 
             data=json.dumps(report, indent=2, default=str),
-            file_name=f"dq_rules_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json",
+            file_name=f"ai_data_profiling_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json",
             mime="application/json"
         )
         show_toast("JSON report generated!", "success")

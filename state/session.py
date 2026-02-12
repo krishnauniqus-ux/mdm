@@ -33,6 +33,8 @@ class AppState:
     exact_duplicates: list = field(default_factory=list)
     fuzzy_duplicates: list = field(default_factory=list)
     combined_duplicates: list = field(default_factory=list)
+    ai_validation_rules: Optional[pd.DataFrame] = None
+    ai_validation_rules_generated: bool = False
     profiling_complete: bool = False
     
     # Operations
@@ -107,6 +109,8 @@ def _save_persisted_data():
             'exact_duplicates': state.exact_duplicates,
             'fuzzy_duplicates': state.fuzzy_duplicates,
             'combined_duplicates': state.combined_duplicates,
+            'ai_validation_rules': state.ai_validation_rules,
+            'ai_validation_rules_generated': state.ai_validation_rules_generated,
             'profiling_complete': state.profiling_complete,
             'processing_status': state.processing_status
         }
@@ -145,6 +149,8 @@ def _restore_persisted_data():
         state.exact_duplicates = persist_data.get('exact_duplicates', [])
         state.fuzzy_duplicates = persist_data.get('fuzzy_duplicates', [])
         state.combined_duplicates = persist_data.get('combined_duplicates', [])
+        state.ai_validation_rules = persist_data.get('ai_validation_rules')
+        state.ai_validation_rules_generated = persist_data.get('ai_validation_rules_generated', False)
         state.profiling_complete = persist_data.get('profiling_complete', False)
         state.processing_status = persist_data.get('processing_status', 'ready')
         
@@ -431,7 +437,8 @@ def _sync_flat_state_from_appstate():
 
         # other commonly used legacy keys
         for key in ('original_df', 'filename', 'column_profiles', 'quality_report',
-                    'exact_duplicates', 'fuzzy_duplicates', 'profiling_complete', 
+                    'exact_duplicates', 'fuzzy_duplicates', 'ai_validation_rules',
+                    'ai_validation_rules_generated', 'profiling_complete', 
                     'processing_status', 'upload_progress', 'fixes_applied', 
                     'operation_count', 'last_operation'):
             try:

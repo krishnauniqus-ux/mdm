@@ -7,18 +7,15 @@ from config import apply_page_config
 def render_header():
     """Render application header"""
     apply_page_config()
-    st.markdown('<h1 class="main-header">🔍 Enterprise Data Profiler Pro</h1>', unsafe_allow_html=True)
-    st.markdown('<p class="sub-header">Production-Grade Data Quality Platform • Supports files up to 1 GB</p>', unsafe_allow_html=True)
-
-
+   
 def render_sidebar():
     """Sidebar with navigation and stats"""
     
     state = st.session_state.app_state
     
     with st.sidebar:
-        st.image("https://cdn-icons-png.flaticon.com/512/2920/2920277.png", width=80)
-        st.title("Navigation")
+        st.image("https://edure.in/wp-content/uploads/2025/02/ai-tools.webp", width=180)
+        st.title("Master Data Profiler")
         
         if state.df is not None:
             # Quick stats

@@ -4,8 +4,7 @@ import streamlit as st
 
 # Page configuration
 PAGE_CONFIG = {
-    "page_title": "Enterprise Data Profiler Pro",
-    "page_icon": "🔍",
+    "page_title": "Data Profiler Pro",
     "layout": "wide",
     "initial_sidebar_state": "expanded"
 }

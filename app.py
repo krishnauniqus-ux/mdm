@@ -28,7 +28,7 @@ import streamlit as st
 
 # Must be first Streamlit command
 st.set_page_config(
-    page_title="Enterprise Data Profiler Pro",
+    page_title="Profiler Pro",
     page_icon="🔍",
     layout="wide",
     initial_sidebar_state="expanded"
