@@ -56,6 +56,13 @@ def main():
 
     # Render layout
     render_header()
+
+    # Authentication Guard
+    if not st.session_state.app_state.authenticated:
+        from auth.ui import render_login_screen
+        render_login_screen()
+        return
+
     render_sidebar()
 
     # Render toast notifications

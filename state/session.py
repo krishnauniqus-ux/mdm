@@ -47,6 +47,11 @@ class AppState:
     upload_progress: Optional[Dict] = None
     processing_status: str = "idle"
     
+    # Auth State
+    authenticated: bool = False
+    user_name: Optional[str] = None
+    username: Optional[str] = None
+    
     # Thread safety
     _lock: threading.Lock = field(default_factory=threading.Lock, repr=False)
 
@@ -112,7 +117,10 @@ def _save_persisted_data():
             'ai_validation_rules': state.ai_validation_rules,
             'ai_validation_rules_generated': state.ai_validation_rules_generated,
             'profiling_complete': state.profiling_complete,
-            'processing_status': state.processing_status
+            'processing_status': state.processing_status,
+            'authenticated': state.authenticated,
+            'user_name': state.user_name,
+            'username': state.username
         }
         
         with open(_get_persist_path(), 'wb') as f:
@@ -153,6 +161,9 @@ def _restore_persisted_data():
         state.ai_validation_rules_generated = persist_data.get('ai_validation_rules_generated', False)
         state.profiling_complete = persist_data.get('profiling_complete', False)
         state.processing_status = persist_data.get('processing_status', 'ready')
+        state.authenticated = persist_data.get('authenticated', False)
+        state.user_name = persist_data.get('user_name')
+        state.username = persist_data.get('username')
         
     except Exception as e:
         logging.debug(f"Failed to restore persisted data: {e}")

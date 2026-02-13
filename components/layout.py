@@ -17,6 +17,18 @@ def render_sidebar():
         st.image("https://edure.in/wp-content/uploads/2025/02/ai-tools.webp", width=180)
         st.title("Master Data Profiler")
         
+        # User Info
+        if state.authenticated:
+            st.markdown(f"👤 **Logged in as:** {state.user_name}")
+            if st.button("🚪 Logout", key="logout_btn", type="tertiary"):
+                from state.session import clear_persisted_data
+                clear_persisted_data()
+                state.authenticated = False
+                state.user_name = None
+                state.username = None
+                st.rerun()
+            st.markdown("---")
+        
         if state.df is not None:
             # Quick stats
             st.markdown("### 📊 Dataset Stats")
