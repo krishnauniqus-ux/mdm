@@ -23,8 +23,8 @@ def render_login_screen():
         _, col, _ = st.columns([1, 2, 1])
         
         with col:
-            username = st.text_input("Username")
-            password = st.text_input("Password", type="password")
+            username = st.text_input("Username", placeholder="Example")
+            password = st.text_input("Password", type="password", placeholder="Pass****")
             
             # hide login button if username and password is empty conditionaly
             if username and password:
@@ -50,5 +50,5 @@ def render_login_screen():
                             st.caption("If you wanted to access this tool kindly pay and get your credentials, for trial one day 5000, for one month 10000, for one year 50000")
                             st.image("assets/Images/QR.jpg", caption="Scan to Pay", use_container_width=True)
 
-        st.markdown("---")
+        # st.markdown("---")
        
