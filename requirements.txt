@@ -9,3 +9,4 @@ Metaphone
 python-dateutil
 plotly
 kaleido
+openai
