@@ -100,8 +100,8 @@ def _save_persisted_data():
     try:
         state = st.session_state.app_state
         
-        # Only persist if we have data
-        if state.df is None:
+        # Persist if we have data OR if user is authenticated
+        if state.df is None and not state.authenticated:
             return
         
         persist_data = {
@@ -135,8 +135,9 @@ def _restore_persisted_data():
     try:
         persist_path = _get_persist_path()
         
-        # Only restore if we don't already have data and persisted file exists
-        if st.session_state.app_state.df is not None:
+        # Only restore if we don't already have data/auth and persisted file exists
+        state = st.session_state.app_state
+        if state.df is not None or state.authenticated:
             return
         
         if not persist_path.exists():
@@ -144,8 +145,6 @@ def _restore_persisted_data():
         
         with open(persist_path, 'rb') as f:
             persist_data = pickle.load(f)
-        
-        state = st.session_state.app_state
         
         # Restore all persisted fields
         state.df = persist_data.get('df')

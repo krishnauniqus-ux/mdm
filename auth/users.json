@@ -6,9 +6,14 @@
       "name": "Administrator"
     },
     {
-      "username": "user1",
-      "password": "user123",
-      "name": "Standard User"
+      "username": "krishna",
+      "password": "krishna@1212",
+      "name": "Krishna Kumar"
+    },
+    {
+      "username": "vineeth",
+      "password": "vineeth@1132",
+      "name": "Vineeth Kumar"
     }
   ]
 }
