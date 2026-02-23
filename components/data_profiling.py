@@ -1133,8 +1133,6 @@ def _render_export_tab():
 
     st.subheader("📥 Export Profiling Report")
 
-    fmt = st.radio("Format", ["Excel (.xlsx)", "JSON (.json)"], horizontal=True)
-
     col1, col2 = st.columns(2)
     with col1:
         if st.button("📊 Generate Excel Report", type="primary", use_container_width=True):
@@ -1165,16 +1163,120 @@ def _analyze_special_chars_detailed(df):
     return data
 
 
+def _apply_dq_rules_styling(workbook, worksheet, validation_df):
+    """Apply professional styling to Data Quality Rules sheet"""
+    from openpyxl.styles import PatternFill, Font, Alignment, Border, Side
+    
+    # Color mapping for DQ Dimensions (matching UI colors)
+    dimension_colors = {
+        'Accuracy': 'DBEAFE',      # Blue
+        'Completeness': 'DCFCE7',  # Green
+        'Consistency': 'FEF3C7',   # Amber
+        'Validity': 'FCE7F3',      # Pink
+        'Uniqueness': 'F3E8FF',    # Purple
+        'Timeliness': 'CCFBF1',    # Teal
+        'Integrity': 'FEE2E2',     # Red
+        'Conformity': 'E0E7FF',    # Indigo
+        'Reliability': 'FFEDD5',   # Orange
+        'Relevance': 'ECFCCB',     # Lime
+        'Precision': 'FAE8FF',     # Fuchsia
+        'Accessibility': 'E0F2FE'  # Sky
+    }
+    
+    # Header styling
+    header_fill = PatternFill(start_color='1F2937', end_color='1F2937', fill_type='solid')
+    header_font = Font(color='FFFFFF', bold=True, size=11)
+    header_alignment = Alignment(horizontal='center', vertical='center', wrap_text=True)
+    
+    # Border style
+    thin_border = Border(
+        left=Side(style='thin'),
+        right=Side(style='thin'),
+        top=Side(style='thin'),
+        bottom=Side(style='thin')
+    )
+    
+    # Apply header formatting
+    for col_num, column_title in enumerate(validation_df.columns, 1):
+        cell = worksheet.cell(row=1, column=col_num)
+        cell.fill = header_fill
+        cell.font = header_font
+        cell.alignment = header_alignment
+        cell.border = thin_border
+    
+    # Apply data formatting
+    for row_num, row in enumerate(validation_df.itertuples(index=False), 2):
+        dimension = row[2] if len(row) > 2 else ''  # Dimension column (index 2)
+        issues_found = row[4] if len(row) > 4 else 0  # Issues Found column (index 4)
+        
+        for col_num, value in enumerate(row, 1):
+            cell = worksheet.cell(row=row_num, column=col_num)
+            cell.border = thin_border
+            
+            # Apply dimension color
+            if col_num == 3:  # Dimension column
+                color = dimension_colors.get(str(dimension), 'FFFFFF')
+                cell.fill = PatternFill(start_color=color, end_color=color, fill_type='solid')
+                cell.font = Font(bold=True)
+            
+            # Highlight issues count
+            if col_num == 5:  # Issues Found column
+                try:
+                    issue_count = int(issues_found) if isinstance(issues_found, (int, float)) else 0
+                    if issue_count > 0:
+                        cell.fill = PatternFill(start_color='FEE2E2', end_color='FEE2E2', fill_type='solid')
+                        cell.font = Font(color='991B1B', bold=True)
+                    else:
+                        cell.fill = PatternFill(start_color='DCFCE7', end_color='DCFCE7', fill_type='solid')
+                        cell.font = Font(color='166534', bold=True)
+                except:
+                    pass
+            
+            # Style example cell
+            if col_num == 6:  # Issues Found Example column
+                if isinstance(value, str):
+                    if value.startswith('✓'):
+                        cell.fill = PatternFill(start_color='DCFCE7', end_color='DCFCE7', fill_type='solid')
+                        cell.font = Font(color='166534', italic=True, size=10)
+                    elif len(value) > 0:
+                        cell.fill = PatternFill(start_color='FEF3C7', end_color='FEF3C7', fill_type='solid')
+                        cell.font = Font(color='92400E', size=10)
+            
+            # Center align
+            cell.alignment = Alignment(horizontal='left', vertical='center', wrap_text=True)
+    
+    # Auto-adjust column widths
+    column_widths = {
+        'A': 6,   # S.No
+        'B': 20,  # Business Field
+        'C': 18,  # Dimension
+        'D': 35,  # Data Quality Rule
+        'E': 12,  # Issues Found
+        'F': 40   # Issues Found Example
+    }
+    
+    for col_letter, width in column_widths.items():
+        worksheet.column_dimensions[col_letter].width = width
+    
+    # Set row height for header
+    worksheet.row_dimensions[1].height = 25
+    
+    # Freeze header row
+    worksheet.freeze_panes = 'A2'
+
+
 def _generate_excel_report():
     state = st.session_state.app_state
     progress = st.progress(0)
     output = io.BytesIO()
 
-
     try:
         with pd.ExcelWriter(output, engine='openpyxl') as writer:
             df = state.df
             profiles = state.column_profiles
+            
+            from openpyxl.styles import PatternFill, Font, Alignment
+            workbook = writer.book
 
             # 1. Executive Summary
             progress.progress(10)
@@ -1217,7 +1319,7 @@ def _generate_excel_report():
             (pd.DataFrame(chars) if chars else pd.DataFrame({'Message': ['No special characters found']})).to_excel(
                 writer, sheet_name='Special Characters', index=False)
 
-            # 4. AI Validation Rules - HUMAN READABLE FORMAT WITH EXAMPLES
+            # 4. AI Validation Rules - STYLED WITH COLORS & FORMATTING
             progress.progress(55)
             if state.ai_validation_rules_generated and state.ai_validation_rules is not None and not state.ai_validation_rules.empty:
                 validation_df = state.ai_validation_rules.copy()
@@ -1225,7 +1327,12 @@ def _generate_excel_report():
                 col_order = ['S.No', 'Business Field', 'Dimension', 'Data Quality Rule', 'Issues Found', 'Issues Found Example']
                 col_order = [c for c in col_order if c in validation_df.columns]
                 validation_df = validation_df[col_order]
+                
                 validation_df.to_excel(writer, sheet_name='Data Quality Rules', index=False)
+                
+                # Apply styling to the Data Quality Rules sheet
+                dq_worksheet = writer.sheets['Data Quality Rules']
+                _apply_dq_rules_styling(workbook, dq_worksheet, validation_df)
             else:
                 pd.DataFrame({'Message': ['No AI validation rules generated. Run validation analysis first.']}).to_excel(
                     writer, sheet_name='Data Quality Rules', index=False)
