@@ -6,6 +6,7 @@ import io
 import re
 import json
 import unicodedata
+import os
 from datetime import datetime
 from collections import Counter, defaultdict
 import time
@@ -1379,10 +1380,21 @@ def _generate_excel_report():
                     writer, sheet_name='DQ Summary', index=False)
 
         progress.progress(100)
+        
+        # Ensure buffer is properly finalized
+        output.seek(0)
+        file_bytes = output.getvalue()
+        
+        # Use original uploaded filename (sanitized) in the exported filename
+        orig_name = getattr(state, 'filename', None) or 'dataset'
+        base_name = os.path.splitext(str(orig_name))[0]
+        safe_orig = re.sub(r'[^A-Za-z0-9_.-]', '_', base_name)
+        export_filename = f"{safe_orig}_Data_Profile_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
+
         st.download_button(
             "⬇️ Download Excel Report", 
-            data=output.getvalue(),
-            file_name=f"Data_Profile_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx",
+            data=file_bytes,
+            file_name=export_filename,
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         )
         show_toast("Excel report generated!", "success")
@@ -1422,10 +1434,19 @@ def _generate_json_report():
             'match_rules': generate_match_rules(df, profiles)
         }
 
+        # Generate JSON string
+        json_data = json.dumps(report, indent=2, default=str)
+        
+        # Use original uploaded filename (sanitized) in the exported filename
+        orig_name = getattr(state, 'filename', None) or 'dataset'
+        base_name = os.path.splitext(str(orig_name))[0]
+        safe_orig = re.sub(r'[^A-Za-z0-9_.-]', '_', base_name)
+        export_filename = f"{safe_orig}_Data_Profile_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+
         st.download_button(
             "⬇️ Download JSON Report", 
-            data=json.dumps(report, indent=2, default=str),
-            file_name=f"dq_rules_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json",
+            data=json_data,
+            file_name=export_filename,
             mime="application/json"
         )
         show_toast("JSON report generated!", "success")
