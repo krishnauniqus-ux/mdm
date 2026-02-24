@@ -454,34 +454,51 @@ class DynamicValidationDetector:
     def generate_comprehensive_dq_rules(self, df: pd.DataFrame, profiles: Dict) -> pd.DataFrame:
         """Generate comprehensive DQ rules with validation results"""
         all_rules = self.detect_all_validations(df, profiles)
-        
+
         # Validate data against rules
         validation_results = self.ai_engine.validate_data_against_rules(df, all_rules)
-        
-        # Create comprehensive output - HUMAN READABLE FORMAT
+
+        # Aggregate validation results by (Column, Dimension) to avoid duplicate Dimension rows
+        if not validation_results.empty:
+            agg_val = validation_results.groupby(['Column', 'Dimension']).agg({
+                'Invalid_Count': 'sum',
+                'Issues_Found_Example': lambda x: '; '.join([str(v) for v in x if pd.notna(v) and v != "✓ All values valid - No issues found"]) or "✓ All values valid - No issues found"
+            }).reset_index()
+        else:
+            agg_val = pd.DataFrame(columns=['Column', 'Dimension', 'Invalid_Count', 'Issues_Found_Example'])
+
+        # Merge rules having the same (Column, Dimension)
+        rules_map = {}
+        for rule in all_rules:
+            col = rule.get('Column')
+            dim = rule.get('Dimension')
+            key = (col, dim)
+            rules_map.setdefault(key, {
+                'Business Field': rule.get('Business Field'),
+                'Rules': []
+            })
+            stmt = rule.get('Data Quality Rule')
+            if stmt and stmt not in rules_map[key]['Rules']:
+                rules_map[key]['Rules'].append(stmt)
+
+        # Build output rows from aggregated map
         output_data = []
-        for idx, rule in enumerate(all_rules, 1):
-            # Find matching validation result
-            match = validation_results[
-                (validation_results['Column'] == rule.get('Column')) & 
-                (validation_results['Dimension'] == rule.get('Dimension'))
-            ]
-            
-            invalid_count = match.iloc[0]['Invalid_Count'] if not match.empty else 0
+        for idx, ((col, dim), meta) in enumerate(rules_map.items(), 1):
+            match = agg_val[(agg_val['Column'] == col) & (agg_val['Dimension'] == dim)]
+            invalid_count = int(match.iloc[0]['Invalid_Count']) if not match.empty else 0
             issues_example = match.iloc[0]['Issues_Found_Example'] if not match.empty else "✓ All values valid - No issues found"
-            
+
             row = {
                 'S.No': idx,
-                'Column': rule.get('Column'),
-                'Business Field': rule.get('Business Field'),
-                'Dimension': rule.get('Dimension'),
-                'Data Quality Rule': rule.get('Data Quality Rule'),
+                'Column': col,
+                'Business Field': meta.get('Business Field'),
+                'Dimension': dim,
+                'Data Quality Rule': '; '.join(meta.get('Rules', [])),
                 'Issues Found': invalid_count,
                 'Issues Found Example': issues_example
             }
-            
             output_data.append(row)
-        
+
         return pd.DataFrame(output_data)
 
 
@@ -497,20 +514,25 @@ def generate_match_rules(df, profiles):
     # Analyze columns
     analysis = {}
     for col, prof in profiles.items():
-        dup_count = prof.total_rows - prof.unique_count
-        dup_pct = (dup_count / prof.total_rows * 100) if prof.total_rows > 0 else 0
+        # Be defensive: profiles may represent columns with zero rows.
+        total_rows = int(getattr(prof, 'total_rows', 0) or 0)
+        unique_count = int(getattr(prof, 'unique_count', 0) or 0)
+        dup_count = max(0, total_rows - unique_count)
+        dup_pct = (dup_count / total_rows * 100) if total_rows > 0 else 0
+
+        dtype = getattr(prof, 'dtype', '') or ''
 
         analysis[col] = {
-            'null_pct': prof.null_percentage,
-            'unique_pct': prof.unique_percentage,
+            'null_pct': getattr(prof, 'null_percentage', 0),
+            'unique_pct': getattr(prof, 'unique_percentage', 0),
             'dup_pct': dup_pct,
             'dup_count': dup_count,
-            'is_text': prof.dtype == 'object',
-            'is_num': any(t in prof.dtype for t in ['int', 'float']),
+            'is_text': dtype == 'object',
+            'is_num': any(t in dtype for t in ['int', 'float']),
             'avg_len': getattr(prof, 'avg_length', 0),
             'max_len': getattr(prof, 'max_length', 0),
             'min_len': getattr(prof, 'min_length', 0),
-            'total_rows': prof.total_rows
+            'total_rows': total_rows
         }
 
     # EXACT MATCH CANDIDATES - Must have duplicates (not 100% unique)

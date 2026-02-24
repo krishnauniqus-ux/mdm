@@ -668,8 +668,18 @@ class DataProfilerEngine:
                 progress_callback=parallel_progress_callback if progress_callback else None
             )
             
-            # Store results
-            for col, profile in results:
+            # Store results - be defensive: some parallel tasks may have failed
+            # and returned None. Skip those to avoid unpacking errors.
+            for item in results:
+                # Each item should be a tuple (col, profile); skip otherwise
+                if item is None:
+                    continue
+                if not isinstance(item, (list, tuple)) or len(item) != 2:
+                    continue
+                col, profile = item
+                if profile is None:
+                    # Skip failed analysis for this column
+                    continue
                 self.column_profiles[col] = profile
             
         if progress_callback:
