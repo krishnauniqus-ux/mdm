@@ -144,6 +144,77 @@ class StreamingDataLoader:
         
         return None
     
+    def get_excel_sheet_names(self) -> Optional[List[str]]:
+        """Get list of sheet names from Excel file"""
+        file_type = self.get_file_type()
+        if file_type != 'excel':
+            return None
+        try:
+            xl = pd.ExcelFile(self.file_path)
+            return xl.sheet_names
+        except Exception:
+            return None
+    
+    def preview_excel_sheet(self, sheet_name: str, n_rows: int = 20) -> pd.DataFrame:
+        """Preview first n rows of specific Excel sheet without header"""
+        try:
+            return pd.read_excel(self.file_path, sheet_name=sheet_name, nrows=n_rows, header=None)
+        except Exception as e:
+            raise ValueError(f"Cannot preview sheet '{sheet_name}': {str(e)}")
+    
+    def load_excel_sheet(self, sheet_name: str, header_row: int = 0, 
+                        callback: Optional[Callable] = None) -> pd.DataFrame:
+        """
+        Load specific Excel sheet with selected header row
+        header_row: 0-based index of row to use as column names (-1 for no header)
+        """
+        safe_callback = WebSocketSafeCallback(callback, throttle_seconds=0.5)
+        
+        try:
+            safe_callback({
+                'status': 'loading',
+                'percent': 10,
+                'message': f'Reading Excel sheet: {sheet_name}...'
+            })
+            
+            # Determine header parameter
+            if header_row == -1:
+                header = None
+            else:
+                header = header_row
+            
+            # Load the sheet
+            df = pd.read_excel(self.file_path, sheet_name=sheet_name, header=header)
+            
+            safe_callback({
+                'status': 'processing',
+                'percent': 80,
+                'message': f'Processing {len(df):,} rows...'
+            })
+            
+            # If no header, generate default column names
+            if header is None:
+                df.columns = [f'Column_{i+1}' for i in range(len(df.columns))]
+            
+            # Optimize types
+            df = optimize_dataframe_types(df)
+            
+            safe_callback({
+                'status': 'complete',
+                'percent': 100,
+                'message': f'Successfully loaded {len(df):,} rows × {len(df.columns)} columns'
+            })
+            
+            return df
+            
+        except Exception as e:
+            safe_callback({
+                'status': 'error',
+                'percent': 0,
+                'message': f'Error loading sheet: {str(e)}'
+            })
+            raise ValueError(f"Cannot load sheet '{sheet_name}': {str(e)}")
+    
     def load_fast_preview(self, n_rows: int = 1000) -> pd.DataFrame:
         """Load quick preview for immediate display"""
         file_type = self.get_file_type()

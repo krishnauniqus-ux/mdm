@@ -109,8 +109,8 @@ def render_preview():
         width="stretch",
         height=600,
         column_config={
-            col: st.column_config.Column(
-                col,
+            str(col): st.column_config.Column(
+                str(col),
                 help=f"Type: {df[col].dtype}",
                 width="medium"
             ) for col in display_df.columns
