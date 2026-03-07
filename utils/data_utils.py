@@ -6,7 +6,7 @@ from typing import List, Optional, Dict
 import pandas as pd
 import unicodedata
 import re
-from models import DuplicateGroup
+from models.data_models import DuplicateGroup
 
 
 def detect_special_characters(series: pd.Series) -> List[Dict]:

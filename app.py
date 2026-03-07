@@ -36,14 +36,15 @@ st.set_page_config(
 
 # -------------------- IMPORT COMPONENTS --------------------
 
-from components.layout import render_header, render_sidebar
-from components.load_data import render_load_data
-from components.data_profiling import render_data_profiling
-from components.find_duplicates import render_find_duplicates   # ✅ NEW
-from components.data_quality import render_data_quality
-from components.compare import render_compare
-from components.preview import render_preview
-from components.export import render_export
+from ui import render_header, render_sidebar
+from features.load_data import render_load_data
+from features.profiling import render_data_profiling
+from features.rule_generator import render_rule_generator
+from features.duplicates import render_find_duplicates
+from features.quality import render_data_quality
+from features.compare import render_compare
+from features.preview import render_preview
+from features.export import render_export
 
 from state.session import init_session_state, render_toasts as session_render_toasts
 
@@ -74,55 +75,63 @@ def main():
 
     tabs = st.tabs([
         "1️⃣ Load Data",
-        "2️⃣ Data Profiling",
-        "3️⃣ Find Duplicates",
-        "4️⃣ Data Quality",
-        "5️⃣ Compare",
-        "6️⃣ Preview",
-        "7️⃣ Export"
+        "2️⃣ Rule Generator",
+        "3️⃣ Data Profiling",
+        "4️⃣ Find Duplicates",
+        "5️⃣ Data Quality",
+        "6️⃣ Compare",
+        "7️⃣ Preview",
+        "8️⃣ Export"
     ])
 
-    # -------------------- TAB 1 --------------------
+    # -------------------- TAB 1: Load Data --------------------
     with tabs[0]:
         render_load_data()
 
-    # -------------------- TAB 2 --------------------
+    # -------------------- TAB 2: Rule Generator --------------------
     with tabs[1]:
+        if state.df is not None:
+            render_rule_generator()
+        else:
+            st.info("⏳ Complete 'Load Data' step first")
+
+    # -------------------- TAB 3: Data Profiling --------------------
+    with tabs[2]:
         if state.df is not None:
             render_data_profiling()
         else:
             st.info("⏳ Complete 'Load Data' step first")
 
-    # -------------------- TAB 3 (NEW) --------------------
-    with tabs[2]:
+    # -------------------- TAB 4: Find Duplicates --------------------
+    with tabs[3]:
         if state.df is not None:
             render_find_duplicates()
         else:
             st.info("⏳ Complete 'Load Data' step first")
 
-    # -------------------- TAB 4 --------------------
-    with tabs[3]:
+    # -------------------- TAB 5: Data Quality --------------------
+    with tabs[4]:
         if state.df is not None:
             render_data_quality()
         else:
             st.info("⏳ Complete 'Load Data' step first")
 
-    # -------------------- TAB 5 --------------------
-    with tabs[4]:
+    # -------------------- TAB 6: Compare --------------------
+    with tabs[5]:
         if state.df is not None and state.original_df is not None:
             render_compare()
         else:
             st.info("⏳ Load data to enable comparison")
 
-    # -------------------- TAB 6 --------------------
-    with tabs[5]:
+    # -------------------- TAB 7: Preview --------------------
+    with tabs[6]:
         if state.df is not None:
             render_preview()
         else:
             st.info("⏳ Complete 'Load Data' step first")
 
-    # -------------------- TAB 7 --------------------
-    with tabs[6]:
+    # -------------------- TAB 8: Export --------------------
+    with tabs[7]:
         if state.df is not None:
             render_export()
         else:

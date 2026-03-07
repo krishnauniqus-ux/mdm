@@ -144,17 +144,17 @@ class StreamingDataLoader:
         
         return None
     
-    def load_fast_preview(self, n_rows: int = 1000) -> pd.DataFrame:
+    def load_fast_preview(self, n_rows: int = 1000, sheet_name: Optional[str] = None, header: int = 0) -> pd.DataFrame:
         """Load quick preview for immediate display"""
         file_type = self.get_file_type()
         
         if file_type == 'csv':
             # Use low_memory=False for better type inference on preview
-            return pd.read_csv(self.file_path, nrows=n_rows, low_memory=False)
+            return pd.read_csv(self.file_path, nrows=n_rows, low_memory=False, header=header)
         elif file_type == 'tsv':
-            return pd.read_csv(self.file_path, sep='\t', nrows=n_rows, low_memory=False)
+            return pd.read_csv(self.file_path, sep='\t', nrows=n_rows, low_memory=False, header=header)
         elif file_type == 'excel':
-            return pd.read_excel(self.file_path, nrows=n_rows)
+            return pd.read_excel(self.file_path, nrows=n_rows, sheet_name=sheet_name, header=header)
         elif file_type == 'json':
             return pd.read_json(self.file_path, nrows=n_rows)
         elif file_type == 'parquet':
@@ -163,7 +163,11 @@ class StreamingDataLoader:
         
         raise ValueError(f"Unsupported file type: {file_type}")
     
-    def load_full_streaming(self, callback: Optional[Callable] = None) -> pd.DataFrame:
+    def load_full_streaming(self, callback: Optional[Callable] = None, 
+                           sheet_name: Optional[str] = None,
+                           header: int = 0,
+                           nrows: Optional[int] = None,
+                           skiprows: Optional[int] = None) -> pd.DataFrame:
         """
         Load full dataset with streaming for large files
         Uses chunked reading and parallel processing
@@ -175,45 +179,74 @@ class StreamingDataLoader:
         
         if not self.is_large_file:
             # Small file - load directly
-            return self._load_complete(file_type)
+            return self._load_complete(file_type, sheet_name=sheet_name, header=header, nrows=nrows, skiprows=skiprows)
         
         # Large file - use chunked processing
-        return self._load_large_file(file_type, safe_callback)
+        return self._load_large_file(file_type, safe_callback, sheet_name=sheet_name, header=header, nrows=nrows, skiprows=skiprows)
     
-    def _load_complete(self, file_type: str) -> pd.DataFrame:
+    def _load_complete(self, file_type: str, sheet_name: Optional[str] = None,
+                       header: int = 0,
+                       nrows: Optional[int] = None,
+                       skiprows: Optional[int] = None) -> pd.DataFrame:
         """Load entire file at once"""
         if file_type == 'csv':
-            return pd.read_csv(self.file_path, low_memory=False)
+            return pd.read_csv(self.file_path, low_memory=False, nrows=nrows, skiprows=skiprows, header=header)
         elif file_type == 'tsv':
-            return pd.read_csv(self.file_path, sep='\t', low_memory=False)
+            return pd.read_csv(self.file_path, sep='\t', low_memory=False, nrows=nrows, skiprows=skiprows, header=header)
         elif file_type == 'excel':
-            return pd.read_excel(self.file_path)
+            return pd.read_excel(self.file_path, sheet_name=sheet_name, nrows=nrows, skiprows=skiprows, header=header)
         elif file_type == 'json':
-            return pd.read_json(self.file_path)
+            return pd.read_json(self.file_path, nrows=nrows)
         elif file_type == 'parquet':
-            return pd.read_parquet(self.file_path)
+            df = pd.read_parquet(self.file_path)
+            if skiprows:
+                df = df.iloc[skiprows:]
+            if nrows:
+                df = df.head(nrows)
+            return df
         elif file_type == 'feather':
-            return pd.read_feather(self.file_path)
+            df = pd.read_feather(self.file_path)
+            if skiprows:
+                df = df.iloc[skiprows:]
+            if nrows:
+                df = df.head(nrows)
+            return df
         
         raise ValueError(f"Unsupported file type: {file_type}")
+
+    def get_excel_sheets(self) -> List[str]:
+        """Get all sheet names from Excel file"""
+        if self.get_file_type() != 'excel':
+            return []
+        xl = pd.ExcelFile(self.file_path)
+        return xl.sheet_names
     
-    def _load_large_file(self, file_type: str, callback: WebSocketSafeCallback) -> pd.DataFrame:
+    def _load_large_file(self, file_type: str, callback: WebSocketSafeCallback,
+                         sheet_name: Optional[str] = None,
+                         header: int = 0,
+                         nrows: Optional[int] = None,
+                         skiprows: Optional[int] = None) -> pd.DataFrame:
         """Load large file in chunks with parallel processing"""
         if file_type not in ['csv', 'tsv']:
             # For non-CSV, fall back to complete load with memory optimization
-            return self._load_complete(file_type)
+            return self._load_complete(file_type, sheet_name=sheet_name, header=header, nrows=nrows, skiprows=skiprows)
         
         sep = '\t' if file_type == 'tsv' else ','
         
         # Get total rows estimate
         total_rows = self.estimate_rows() or 0
-        
+        if nrows and total_rows > nrows:
+            total_rows = nrows
+            
         # Read in chunks
         chunk_iter = pd.read_csv(
             self.file_path, 
             sep=sep, 
             chunksize=100000,
-            low_memory=False
+            low_memory=False,
+            nrows=nrows,
+            skiprows=skiprows,
+            header=header
         )
         
         chunks = []

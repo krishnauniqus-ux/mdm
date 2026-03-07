@@ -9,7 +9,7 @@ from rapidfuzz import fuzz
 import difflib
 import jellyfish
 from metaphone import doublemetaphone
-from models import DuplicateGroup
+from models.data_models import DuplicateGroup
 
 
 class FuzzyMatcher:

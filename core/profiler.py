@@ -3,7 +3,7 @@
 from typing import Dict, Optional, List
 import pandas as pd
 import numpy as np
-from models import ColumnProfile, DataQualityReport, DuplicateGroup
+from models.data_models import ColumnProfile, DataQualityReport, DuplicateGroup
 from utils.fuzzy_matching import FuzzyMatcher
 from utils.data_utils import detect_special_characters, find_exact_duplicates, generate_column_suggestions
 from utils.concurrency import ParallelProcessor, TimeEstimator

@@ -27,6 +27,12 @@ class AppState:
     filename: str = "dataset"
     file_path: Optional[str] = None
     
+    # Data Selection State
+    selected_sheets: list = field(default_factory=list)
+    header_row: int = 0
+    selected_columns: list = field(default_factory=list)
+    detected_dq_rules: Dict = field(default_factory=dict)
+    
     # Profiling
     column_profiles: Dict = field(default_factory=dict)
     quality_report: Optional[Any] = None
