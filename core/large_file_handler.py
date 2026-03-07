@@ -144,7 +144,7 @@ class StreamingDataLoader:
         
         return None
     
-    def load_fast_preview(self, n_rows: int = 1000, sheet_name: Optional[str] = None, header: int = 0) -> pd.DataFrame:
+    def load_fast_preview(self, n_rows: int = 1000) -> pd.DataFrame:
         """Load quick preview for immediate display"""
         file_type = self.get_file_type()
         
