@@ -144,10 +144,16 @@ class StreamingDataLoader:
         
         return None
     
-    def load_fast_preview(self, n_rows: int = 1000) -> pd.DataFrame:
-        """Load quick preview for immediate display"""
+    def load_fast_preview(self, n_rows: int = 1000, sheet_name: str = None, header: int = 0) -> pd.DataFrame:
+        """Load quick preview for immediate display
+
+        Args:
+            n_rows: Number of rows to preview
+            sheet_name: Sheet name for Excel files (optional)
+            header: Row number to use as header (default 0, None for no header)
+        """
         file_type = self.get_file_type()
-        
+
         if file_type == 'csv':
             # Use low_memory=False for better type inference on preview
             return pd.read_csv(self.file_path, nrows=n_rows, low_memory=False, header=header)
@@ -160,8 +166,9 @@ class StreamingDataLoader:
         elif file_type == 'parquet':
             # Parquet is efficient, can read metadata without full load
             return pd.read_parquet(self.file_path).head(n_rows)
-        
+
         raise ValueError(f"Unsupported file type: {file_type}")
+
     
     def load_full_streaming(self, callback: Optional[Callable] = None, 
                            sheet_name: Optional[str] = None,
