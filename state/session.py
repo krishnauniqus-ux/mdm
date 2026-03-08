@@ -41,6 +41,8 @@ class AppState:
     combined_duplicates: list = field(default_factory=list)
     ai_validation_rules: Optional[pd.DataFrame] = None
     ai_validation_rules_generated: bool = False
+    unified_validation_rules: Optional[pd.DataFrame] = None
+    unified_rules_generated: bool = False
     profiling_complete: bool = False
     
     # Operations
@@ -454,7 +456,8 @@ def _sync_flat_state_from_appstate():
         # other commonly used legacy keys
         for key in ('original_df', 'filename', 'column_profiles', 'quality_report',
                     'exact_duplicates', 'fuzzy_duplicates', 'ai_validation_rules',
-                    'ai_validation_rules_generated', 'profiling_complete', 
+                    'ai_validation_rules_generated', 'unified_validation_rules',
+                    'unified_rules_generated', 'profiling_complete', 
                     'processing_status', 'upload_progress', 'fixes_applied', 
                     'operation_count', 'last_operation'):
             try:

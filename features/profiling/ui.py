@@ -1964,6 +1964,13 @@ def _apply_dq_rules_styling(workbook, worksheet, validation_df):
 
 def _generate_excel_report():
     state = st.session_state.app_state
+    
+    # Initialize unified rules attributes if they don't exist
+    if not hasattr(state, 'unified_rules_generated'):
+        state.unified_rules_generated = False
+    if not hasattr(state, 'unified_validation_rules'):
+        state.unified_validation_rules = None
+    
     progress = st.progress(0)
     output = io.BytesIO()
 
@@ -2054,6 +2061,12 @@ def _generate_excel_report():
 def _generate_json_report():
     import json
     state = st.session_state.app_state
+    
+    # Initialize unified rules attributes if they don't exist
+    if not hasattr(state, 'unified_rules_generated'):
+        state.unified_rules_generated = False
+    if not hasattr(state, 'unified_validation_rules'):
+        state.unified_validation_rules = None
 
     try:
         df = state.df
