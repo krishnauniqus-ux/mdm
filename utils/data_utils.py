@@ -106,14 +106,27 @@ def format_special_chars_display(special_chars: List[Dict]) -> str:
 
 
 def find_exact_duplicates(df: pd.DataFrame, subset: Optional[List[str]] = None) -> List[DuplicateGroup]:
-    """Find exact duplicate rows using vectorized hashing"""
+    """Find exact duplicate rows using vectorized hashing, ignoring null-to-null matches"""
     try:
         if subset is None:
             subset = df.columns.tolist()
         
+        # CRITICAL FIX: Filter out rows where ALL subset columns are null
+        # This prevents null-to-null matches
+        subset_df = df[subset]
+        
+        # Create mask for rows that have at least one non-null value in subset columns
+        has_non_null = subset_df.notna().any(axis=1)
+        
+        # Only consider rows with at least one non-null value
+        valid_df = df[has_non_null]
+        
+        if len(valid_df) == 0:
+            return []
+        
         # Use pandas hashing which is much faster than row-by-row
         # hash_pandas_object returns a Series of uint64 hashes
-        hashes = pd.util.hash_pandas_object(df[subset], index=False)
+        hashes = pd.util.hash_pandas_object(valid_df[subset], index=False)
         
         # Find duplicates based on hash
         # duplicated(keep=False) marks all duplicates as True
@@ -138,26 +151,21 @@ def find_exact_duplicates(df: pd.DataFrame, subset: Optional[List[str]] = None) 
             
             if len(idx_list) < 2:
                 continue
+            
+            # Additional check: Ensure the group doesn't consist of all-null rows
+            # (This should already be filtered, but double-check)
+            group_subset = valid_df.loc[idx_list, subset]
+            if group_subset.isna().all().all():
+                continue
                 
-            # Double check that they really are identical (hash collisions are rare but possible)
-            # Take the first row as reference
-            first_row_idx = idx_list[0]
-            
-            # Since we grouped by hash, we just need to verify values if strictness is needed
-            # For performance, we assume hash collision is negligible for 64-bit hash in this context,
-            # but to be 100% safe we could do:
-            # group_df = df.loc[idx_list, subset]
-            # exact_groups = group_df.groupby(list(subset)).groups
-            # But that defeats the purpose of hashing speedup if we groupby columns again.
-            # Using 64-bit hash from pandas is standard for this.
-            
             # Get values for display (convert to dict is slow for big groups, so be careful?)
             # The UI needs `values` as a list of dicts.
             # Limit values stored to avoid memory explosion if group is huge
             
             # Get representative value safely
             try:
-                rep_val = str(df.loc[first_row_idx, subset].to_dict())
+                first_row_idx = idx_list[0]
+                rep_val = str(valid_df.loc[first_row_idx, subset].to_dict())
             except:
                 rep_val = "Error getting value"
             
@@ -165,9 +173,9 @@ def find_exact_duplicates(df: pd.DataFrame, subset: Optional[List[str]] = None) 
             # Optimization: If group is huge (>100), only store first 100 to save memory in state
             stored_indices = idx_list
             if len(idx_list) > 100:
-                stored_values = [df.loc[i, subset].to_dict() for i in idx_list[:100]]
+                stored_values = [valid_df.loc[i, subset].to_dict() for i in idx_list[:100]]
             else:
-                stored_values = [df.loc[i, subset].to_dict() for i in idx_list]
+                stored_values = [valid_df.loc[i, subset].to_dict() for i in idx_list]
             
             groups.append(DuplicateGroup(
                 group_id=group_id,

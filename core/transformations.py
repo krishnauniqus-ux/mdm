@@ -56,16 +56,56 @@ def transform_remove_exact_duplicates(subset=None, keep='first'):
     return removed
 
 
-def transform_remove_fuzzy_group(group_indices, strategy='keep_first'):
-    """Remove fuzzy duplicate group"""
+def transform_remove_fuzzy_group(group_indices, strategy='keep_first', selected_index=None, selected_indices=None):
+    """Remove fuzzy duplicate group
+    
+    Args:
+        group_indices: List of row indices in the duplicate group
+        strategy: 'keep_first', 'keep_last', 'keep_selected', 'keep_multiple', or 'merge'
+        selected_index: Index within the group to keep (0-based, used with 'keep_selected')
+        selected_indices: List of indices within the group to keep (0-based, used with 'keep_multiple')
+    """
     df = st.session_state.df
     
     if strategy == 'keep_first':
         keep_idx = group_indices[0]
         drop_indices = group_indices[1:]
+        strategy_msg = "kept first"
     elif strategy == 'keep_last':
         keep_idx = group_indices[-1]
         drop_indices = group_indices[:-1]
+        strategy_msg = "kept last"
+    elif strategy == 'keep_selected':
+        if selected_index is None or selected_index < 0 or selected_index >= len(group_indices):
+            # Fallback to keep_first if invalid selection
+            keep_idx = group_indices[0]
+            drop_indices = group_indices[1:]
+            strategy_msg = "kept first (fallback)"
+        else:
+            keep_idx = group_indices[selected_index]
+            drop_indices = [idx for i, idx in enumerate(group_indices) if i != selected_index]
+            strategy_msg = f"kept row {selected_index + 1}"
+    elif strategy == 'keep_multiple':
+        if selected_indices is None or len(selected_indices) == 0:
+            # Fallback to keep_first if no selection
+            keep_idx = group_indices[0]
+            drop_indices = group_indices[1:]
+            strategy_msg = "kept first (fallback)"
+        else:
+            # Keep all selected rows, remove unselected ones
+            keep_indices = [group_indices[i] for i in selected_indices if i < len(group_indices)]
+            drop_indices = [idx for i, idx in enumerate(group_indices) if i not in selected_indices]
+            # No single keep_idx needed, we're keeping multiple
+            if drop_indices:
+                df = df.drop(drop_indices)
+                strategy_msg = f"kept {len(keep_indices)} selected rows"
+                update_dataframe(df, f"Removed duplicate group ({len(group_indices)} rows, {strategy_msg})")
+                return
+            else:
+                # All rows selected, nothing to remove
+                from state.session import show_toast
+                show_toast("All rows selected - nothing to remove", "info")
+                return
     elif strategy == 'merge':
         keep_idx = group_indices[0]
         for idx in group_indices[1:]:
@@ -73,9 +113,16 @@ def transform_remove_fuzzy_group(group_indices, strategy='keep_first'):
                 if pd.isna(df.loc[keep_idx, col]) and not pd.isna(df.loc[idx, col]):
                     df.loc[keep_idx, col] = df.loc[idx, col]
         drop_indices = group_indices[1:]
+        strategy_msg = "merged"
+    else:
+        # Default to keep_first
+        keep_idx = group_indices[0]
+        drop_indices = group_indices[1:]
+        strategy_msg = "kept first (default)"
     
-    df = df.drop(drop_indices)
-    update_dataframe(df, f"Merged fuzzy duplicate group ({len(group_indices)} rows)")
+    if drop_indices:
+        df = df.drop(drop_indices)
+        update_dataframe(df, f"Removed duplicate group ({len(group_indices)} rows, {strategy_msg})")
 
 
 def transform_handle_missing(strategy='auto', columns=None):
