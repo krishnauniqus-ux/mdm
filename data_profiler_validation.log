@@ -6488,3 +6488,8 @@ expenditure transactio
 2026-03-07 15:47:11,865 - httpx - INFO - HTTP Request: POST https://datainfa-azure.openai.azure.com/openai/deployments/gpt-4o-mini/chat/completions?api-version=2024-12-01-preview "HTTP/1.1 200 OK"
 2026-03-07 15:47:12,876 - features.rule_generator.engine - INFO - Column 'Budget Date' marked as mandatory (keyword found)
 2026-03-07 15:47:15,343 - httpx - INFO - HTTP Request: POST https://datainfa-azure.openai.azure.com/openai/deployments/gpt-4o-mini/chat/completions?api-version=2024-12-01-preview "HTTP/1.1 200 OK"
+2026-03-09 01:55:10,553 - httpx - INFO - HTTP Request: POST https://datainfa-azure.openai.azure.com/openai/deployments/gpt-4o-mini/chat/completions?api-version=2024-12-01-preview "HTTP/1.1 200 OK"
+2026-03-09 01:55:14,853 - httpx - INFO - HTTP Request: POST https://datainfa-azure.openai.azure.com/openai/deployments/gpt-4o-mini/chat/completions?api-version=2024-12-01-preview "HTTP/1.1 200 OK"
+2026-03-09 01:55:18,657 - httpx - INFO - HTTP Request: POST https://datainfa-azure.openai.azure.com/openai/deployments/gpt-4o-mini/chat/completions?api-version=2024-12-01-preview "HTTP/1.1 200 OK"
+2026-03-09 01:55:22,943 - httpx - INFO - HTTP Request: POST https://datainfa-azure.openai.azure.com/openai/deployments/gpt-4o-mini/chat/completions?api-version=2024-12-01-preview "HTTP/1.1 200 OK"
+2026-03-09 01:55:26,733 - httpx - INFO - HTTP Request: POST https://datainfa-azure.openai.azure.com/openai/deployments/gpt-4o-mini/chat/completions?api-version=2024-12-01-preview "HTTP/1.1 200 OK"
