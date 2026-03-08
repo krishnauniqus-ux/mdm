@@ -6022,3 +6022,469 @@ B2B Supplier Site Code
 2026-03-07 15:03:10,434 - features.rule_generator.engine - INFO - Extracted from 'Pay Each Document Alone': Type=VARCHAR2, MaxLength=1
 2026-03-07 15:03:10,437 - features.rule_generator.engine - INFO - Extracted from 'Pay Each Document Alone': Type=VARCHAR2, MaxLength=1
 2026-03-07 15:03:12,945 - httpx - INFO - HTTP Request: POST https://datainfa-azure.openai.azure.com/openai/deployments/gpt-4o-mini/chat/completions?api-version=2024-12-01-preview "HTTP/1.1 200 OK"
+2026-03-07 15:44:04,539 - features.rule_generator.ui - INFO - Deep scanning sheet 'Open PO' with header row 1
+2026-03-07 15:44:04,618 - features.rule_generator.engine - INFO - === DEEP SCANNING RULE SHEET: Open PO ===
+2026-03-07 15:44:04,619 - features.rule_generator.engine - INFO - Sheet dimensions: 8 rows x 47 columns
+2026-03-07 15:44:04,620 - features.rule_generator.engine - INFO - Header row specified: 2 (1-based)
+2026-03-07 15:44:04,622 - features.rule_generator.engine - INFO - Column 2: * Interface Header Key
+2026-03-07 15:44:04,622 - features.rule_generator.engine - INFO - Column 3: * Action
+2026-03-07 15:44:04,623 - features.rule_generator.engine - INFO - Column 4: Batch ID
+2026-03-07 15:44:04,624 - features.rule_generator.engine - INFO - Column 5: Import Source
+2026-03-07 15:44:04,626 - features.rule_generator.engine - INFO - Column 6: Approval Action
+2026-03-07 15:44:04,627 - features.rule_generator.engine - INFO - Column 7: Document Type Code
+2026-03-07 15:44:04,627 - features.rule_generator.engine - INFO - Column 8: Procurement BU
+2026-03-07 15:44:04,628 - features.rule_generator.engine - INFO - Column 9: Requisitioning BU
+2026-03-07 15:44:04,629 - features.rule_generator.engine - INFO - Column 10: Sold-to Legal Entity
+2026-03-07 15:44:04,629 - features.rule_generator.engine - INFO - Column 11: Bill-to BU
+2026-03-07 15:44:04,630 - features.rule_generator.engine - INFO - Column 12: Buyer
+2026-03-07 15:44:04,630 - features.rule_generator.engine - INFO - Column 13: Currency Code
+2026-03-07 15:44:04,631 - features.rule_generator.engine - INFO - Column 14: Bill-to Location
+2026-03-07 15:44:04,632 - features.rule_generator.engine - INFO - Column 15: Ship-to Location
+2026-03-07 15:44:04,633 - features.rule_generator.engine - INFO - Column 16: Supplier
+2026-03-07 15:44:04,633 - features.rule_generator.engine - INFO - Column 17: Supplier Site
+2026-03-07 15:44:04,634 - features.rule_generator.engine - INFO - Column 18: Line
+2026-03-07 15:44:04,635 - features.rule_generator.engine - INFO - Column 19: Line Type
+2026-03-07 15:44:04,635 - features.rule_generator.engine - INFO - Column 20: Item
+2026-03-07 15:44:04,636 - features.rule_generator.engine - INFO - Column 21: Item Description
+2026-03-07 15:44:04,637 - features.rule_generator.engine - INFO - Column 22: Quantity
+2026-03-07 15:44:04,639 - features.rule_generator.engine - INFO - Column 23: UOM
+2026-03-07 15:44:04,640 - features.rule_generator.engine - INFO - Column 24: Price
+2026-03-07 15:44:04,641 - features.rule_generator.engine - INFO - Column 25: ATTRIBUTE2
+2026-03-07 15:44:04,642 - features.rule_generator.engine - INFO - Column 26: ATTRIBUTE3
+2026-03-07 15:44:04,642 - features.rule_generator.engine - INFO - Column 27: ATTRIBUTE4
+2026-03-07 15:44:04,643 - features.rule_generator.engine - INFO - Column 28: Destination Type Code
+2026-03-07 15:44:04,643 - features.rule_generator.engine - INFO - Column 29: Inspection Required
+2026-03-07 15:44:04,644 - features.rule_generator.engine - INFO - Column 30: Requested Delivery Date
+2026-03-07 15:44:04,645 - features.rule_generator.engine - INFO - Column 31: Invoice Match Option
+2026-03-07 15:44:04,646 - features.rule_generator.engine - INFO - Column 32: Deliver-to Location
+2026-03-07 15:44:04,647 - features.rule_generator.engine - INFO - Column 33: Subinventory
+2026-03-07 15:44:04,648 - features.rule_generator.engine - INFO - Column 34: CHARGE_ACCOUNT_SEGMENT1
+2026-03-07 15:44:04,649 - features.rule_generator.engine - INFO - Column 35: CHARGE_ACCOUNT_SEGMENT2
+2026-03-07 15:44:04,649 - features.rule_generator.engine - INFO - Column 36: CHARGE_ACCOUNT_SEGMENT3
+2026-03-07 15:44:04,650 - features.rule_generator.engine - INFO - Column 37: CHARGE_ACCOUNT_SEGMENT4
+2026-03-07 15:44:04,651 - features.rule_generator.engine - INFO - Column 38: CHARGE_ACCOUNT_SEGMENT5
+2026-03-07 15:44:04,651 - features.rule_generator.engine - INFO - Column 39: CHARGE_ACCOUNT_SEGMENT6
+2026-03-07 15:44:04,652 - features.rule_generator.engine - INFO - Column 40: CHARGE_ACCOUNT_SEGMENT7
+2026-03-07 15:44:04,652 - features.rule_generator.engine - INFO - Column 41: CHARGE_ACCOUNT_SEGMENT8
+2026-03-07 15:44:04,653 - features.rule_generator.engine - INFO - Column 42: Project Number
+2026-03-07 15:44:04,654 - features.rule_generator.engine - INFO - Column 43: Task Number
+2026-03-07 15:44:04,654 - features.rule_generator.engine - INFO - Column 44: Expenditure Item Date
+2026-03-07 15:44:04,656 - features.rule_generator.engine - INFO - Column 45: Expenditure Type
+2026-03-07 15:44:04,657 - features.rule_generator.engine - INFO - Column 46: Expenditure Organization
+2026-03-07 15:44:04,658 - features.rule_generator.engine - INFO - Column 47: Budget Date
+2026-03-07 15:44:04,659 - features.rule_generator.engine - INFO - Found 46 columns in header row 2
+2026-03-07 15:44:04,660 - features.rule_generator.engine - INFO - Column '* Interface Header Key': Found header comment
+2026-03-07 15:44:04,660 - features.rule_generator.engine - INFO - Column '* Interface Header Key': Found rule in row 4 below header: VARCHAR2(50 CHAR)
+2026-03-07 15:44:04,661 - features.rule_generator.engine - INFO - Column '* Interface Header Key': Total rules found: 3
+2026-03-07 15:44:04,662 - features.rule_generator.engine - INFO - Column '* Action': Found header comment
+2026-03-07 15:44:04,662 - features.rule_generator.engine - INFO - Column '* Action': Found rule in row 4 below header: VARCHAR2(25 CHAR)
+2026-03-07 15:44:04,663 - features.rule_generator.engine - INFO - Column '* Action': Found rule in row 5 below header: Must be the following 2 values:
+ORIGINAL
+UPDATE
+2026-03-07 15:44:04,664 - features.rule_generator.engine - INFO - Column '* Action': Total rules found: 4
+2026-03-07 15:44:04,664 - features.rule_generator.engine - INFO - Column 'Batch ID': Found header comment
+2026-03-07 15:44:04,665 - features.rule_generator.engine - INFO - Column 'Batch ID': Found rule in row 4 below header: NUMBER
+2026-03-07 15:44:04,665 - features.rule_generator.engine - INFO - Column 'Batch ID': Total rules found: 3
+2026-03-07 15:44:04,666 - features.rule_generator.engine - INFO - Column 'Import Source': Found header comment
+2026-03-07 15:44:04,667 - features.rule_generator.engine - INFO - Column 'Import Source': Found rule in row 4 below header: VARCHAR2(25 CHAR)
+2026-03-07 15:44:04,668 - features.rule_generator.engine - INFO - Column 'Import Source': Total rules found: 3
+2026-03-07 15:44:04,668 - features.rule_generator.engine - INFO - Column 'Approval Action': Found header comment
+2026-03-07 15:44:04,669 - features.rule_generator.engine - INFO - Column 'Approval Action': Found rule in row 4 below header: VARCHAR2(25 CHAR)
+2026-03-07 15:44:04,669 - features.rule_generator.engine - INFO - Column 'Approval Action': Total rules found: 3
+2026-03-07 15:44:04,670 - features.rule_generator.engine - INFO - Column 'Document Type Code': Found header comment
+2026-03-07 15:44:04,671 - features.rule_generator.engine - INFO - Column 'Document Type Code': Found rule in row 4 below header: VARCHAR2(25 CHAR)
+2026-03-07 15:44:04,673 - features.rule_generator.engine - INFO - Column 'Document Type Code': Total rules found: 3
+2026-03-07 15:44:04,674 - features.rule_generator.engine - INFO - Column 'Procurement BU': Found header comment
+2026-03-07 15:44:04,675 - features.rule_generator.engine - INFO - Column 'Procurement BU': Found rule in row 4 below header: VARCHAR2(240 CHAR)
+2026-03-07 15:44:04,675 - features.rule_generator.engine - INFO - Column 'Procurement BU': Found rule in row 6 below header: Mandatory
+2026-03-07 15:44:04,676 - features.rule_generator.engine - INFO - Column 'Procurement BU': Total rules found: 4
+2026-03-07 15:44:04,677 - features.rule_generator.engine - INFO - Column 'Requisitioning BU': Found header comment
+2026-03-07 15:44:04,677 - features.rule_generator.engine - INFO - Column 'Requisitioning BU': Found rule in row 4 below header: VARCHAR2(240 CHAR)
+2026-03-07 15:44:04,678 - features.rule_generator.engine - INFO - Column 'Requisitioning BU': Found rule in row 6 below header: Mandatory
+2026-03-07 15:44:04,679 - features.rule_generator.engine - INFO - Column 'Requisitioning BU': Total rules found: 4
+2026-03-07 15:44:04,680 - features.rule_generator.engine - INFO - Column 'Sold-to Legal Entity': Found header comment
+2026-03-07 15:44:04,681 - features.rule_generator.engine - INFO - Column 'Sold-to Legal Entity': Found rule in row 4 below header: VARCHAR2(240 CHAR)
+2026-03-07 15:44:04,682 - features.rule_generator.engine - INFO - Column 'Sold-to Legal Entity': Found rule in row 6 below header: Mandatory
+2026-03-07 15:44:04,682 - features.rule_generator.engine - INFO - Column 'Sold-to Legal Entity': Total rules found: 4
+2026-03-07 15:44:04,683 - features.rule_generator.engine - INFO - Column 'Bill-to BU': Found header comment
+2026-03-07 15:44:04,683 - features.rule_generator.engine - INFO - Column 'Bill-to BU': Found rule in row 4 below header: VARCHAR2(240 CHAR)
+2026-03-07 15:44:04,684 - features.rule_generator.engine - INFO - Column 'Bill-to BU': Found rule in row 6 below header: Mandatory
+2026-03-07 15:44:04,684 - features.rule_generator.engine - INFO - Column 'Bill-to BU': Total rules found: 4
+2026-03-07 15:44:04,685 - features.rule_generator.engine - INFO - Column 'Buyer': Found header comment
+2026-03-07 15:44:04,686 - features.rule_generator.engine - INFO - Column 'Buyer': Found rule in row 4 below header: VARCHAR2(2000 CHAR)
+2026-03-07 15:44:04,687 - features.rule_generator.engine - INFO - Column 'Buyer': Found rule in row 6 below header: Mandatory
+2026-03-07 15:44:04,688 - features.rule_generator.engine - INFO - Column 'Buyer': Total rules found: 4
+2026-03-07 15:44:04,689 - features.rule_generator.engine - INFO - Column 'Currency Code': Found header comment
+2026-03-07 15:44:04,689 - features.rule_generator.engine - INFO - Column 'Currency Code': Found rule in row 4 below header: VARCHAR2(15 CHAR)
+2026-03-07 15:44:04,691 - features.rule_generator.engine - INFO - Column 'Currency Code': Found rule in row 6 below header: Mandatory
+2026-03-07 15:44:04,692 - features.rule_generator.engine - INFO - Column 'Currency Code': Total rules found: 4
+2026-03-07 15:44:04,693 - features.rule_generator.engine - INFO - Column 'Bill-to Location': Found header comment
+2026-03-07 15:44:04,694 - features.rule_generator.engine - INFO - Column 'Bill-to Location': Found rule in row 4 below header: VARCHAR2(60 CHAR)
+2026-03-07 15:44:04,694 - features.rule_generator.engine - INFO - Column 'Bill-to Location': Found rule in row 6 below header: Mandatory
+2026-03-07 15:44:04,695 - features.rule_generator.engine - INFO - Column 'Bill-to Location': Total rules found: 4
+2026-03-07 15:44:04,696 - features.rule_generator.engine - INFO - Column 'Ship-to Location': Found header comment
+2026-03-07 15:44:04,696 - features.rule_generator.engine - INFO - Column 'Ship-to Location': Found rule in row 4 below header: VARCHAR2(60 CHAR)
+2026-03-07 15:44:04,697 - features.rule_generator.engine - INFO - Column 'Ship-to Location': Found rule in row 6 below header: Mandatory
+2026-03-07 15:44:04,698 - features.rule_generator.engine - INFO - Column 'Ship-to Location': Total rules found: 4
+2026-03-07 15:44:04,698 - features.rule_generator.engine - INFO - Column 'Supplier': Found header comment
+2026-03-07 15:44:04,699 - features.rule_generator.engine - INFO - Column 'Supplier': Found rule in row 4 below header: VARCHAR2(360 CHAR)
+2026-03-07 15:44:04,700 - features.rule_generator.engine - INFO - Column 'Supplier': Found rule in row 6 below header: Mandatory
+2026-03-07 15:44:04,700 - features.rule_generator.engine - INFO - Column 'Supplier': Total rules found: 4
+2026-03-07 15:44:04,701 - features.rule_generator.engine - INFO - Column 'Supplier Site': Found header comment
+2026-03-07 15:44:04,702 - features.rule_generator.engine - INFO - Column 'Supplier Site': Found rule in row 4 below header: VARCHAR2(240 CHAR)
+2026-03-07 15:44:04,702 - features.rule_generator.engine - INFO - Column 'Supplier Site': Found rule in row 6 below header: Mandatory
+2026-03-07 15:44:04,703 - features.rule_generator.engine - INFO - Column 'Supplier Site': Total rules found: 4
+2026-03-07 15:44:04,704 - features.rule_generator.engine - INFO - Column 'Line': Found header comment
+2026-03-07 15:44:04,705 - features.rule_generator.engine - INFO - Column 'Line': Found rule in row 4 below header: NUMBER
+2026-03-07 15:44:04,705 - features.rule_generator.engine - INFO - Column 'Line': Found rule in row 5 below header: Line Number
+2026-03-07 15:44:04,706 - features.rule_generator.engine - INFO - Column 'Line': Found rule in row 6 below header: Mandatory
+2026-03-07 15:44:04,707 - features.rule_generator.engine - INFO - Column 'Line': Found rule in row 7 below header: Line_Number
+2026-03-07 15:44:04,707 - features.rule_generator.engine - INFO - Column 'Line': Total rules found: 5
+2026-03-07 15:44:04,709 - features.rule_generator.engine - INFO - Column 'Line Type': Found header comment
+2026-03-07 15:44:04,710 - features.rule_generator.engine - INFO - Column 'Line Type': Found rule in row 4 below header: VARCHAR2(30 CHAR)
+2026-03-07 15:44:04,711 - features.rule_generator.engine - INFO - Column 'Line Type': Found rule in row 6 below header: Mandatory
+2026-03-07 15:44:04,712 - features.rule_generator.engine - INFO - Column 'Line Type': Total rules found: 4
+2026-03-07 15:44:04,712 - features.rule_generator.engine - INFO - Column 'Item': Found header comment
+2026-03-07 15:44:04,713 - features.rule_generator.engine - INFO - Column 'Item': Found rule in row 4 below header: VARCHAR2(300 CHAR)
+2026-03-07 15:44:04,714 - features.rule_generator.engine - INFO - Column 'Item': Found rule in row 5 below header: Item number
+2026-03-07 15:44:04,714 - features.rule_generator.engine - INFO - Column 'Item': Found rule in row 6 below header: Mandatory
+2026-03-07 15:44:04,715 - features.rule_generator.engine - INFO - Column 'Item': Total rules found: 5
+2026-03-07 15:44:04,716 - features.rule_generator.engine - INFO - Column 'Item Description': Found header comment
+2026-03-07 15:44:04,717 - features.rule_generator.engine - INFO - Column 'Item Description': Found rule in row 4 below header: VARCHAR2(240 CHAR)
+2026-03-07 15:44:04,717 - features.rule_generator.engine - INFO - Column 'Item Description': Found rule in row 6 below header: Mandatory
+2026-03-07 15:44:04,718 - features.rule_generator.engine - INFO - Column 'Item Description': Total rules found: 4
+2026-03-07 15:44:04,718 - features.rule_generator.engine - INFO - Column 'Quantity': Found header comment
+2026-03-07 15:44:04,719 - features.rule_generator.engine - INFO - Column 'Quantity': Found rule in row 4 below header: NUMBER
+2026-03-07 15:44:04,720 - features.rule_generator.engine - INFO - Column 'Quantity': Found rule in row 6 below header: Mandatory
+2026-03-07 15:44:04,722 - features.rule_generator.engine - INFO - Column 'Quantity': Total rules found: 4
+2026-03-07 15:44:04,722 - features.rule_generator.engine - INFO - Column 'UOM': Found header comment
+2026-03-07 15:44:04,723 - features.rule_generator.engine - INFO - Column 'UOM': Found rule in row 4 below header: VARCHAR2(25 CHAR)
+2026-03-07 15:44:04,724 - features.rule_generator.engine - INFO - Column 'UOM': Found rule in row 6 below header: Mandatory
+2026-03-07 15:44:04,725 - features.rule_generator.engine - INFO - Column 'UOM': Total rules found: 4
+2026-03-07 15:44:04,726 - features.rule_generator.engine - INFO - Column 'Price': Found header comment
+2026-03-07 15:44:04,727 - features.rule_generator.engine - INFO - Column 'Price': Found rule in row 4 below header: NUMBER
+2026-03-07 15:44:04,728 - features.rule_generator.engine - INFO - Column 'Price': Found rule in row 6 below header: Mandatory
+2026-03-07 15:44:04,729 - features.rule_generator.engine - INFO - Column 'Price': Total rules found: 4
+2026-03-07 15:44:04,730 - features.rule_generator.engine - INFO - Column 'ATTRIBUTE2': Found header comment
+2026-03-07 15:44:04,730 - features.rule_generator.engine - INFO - Column 'ATTRIBUTE2': Found rule in row 4 below header: VARCHAR2(150 CHAR)
+2026-03-07 15:44:04,731 - features.rule_generator.engine - INFO - Column 'ATTRIBUTE2': Found rule in row 6 below header: Mandatory
+2026-03-07 15:44:04,732 - features.rule_generator.engine - INFO - Column 'ATTRIBUTE2': Total rules found: 4
+2026-03-07 15:44:04,732 - features.rule_generator.engine - INFO - Column 'ATTRIBUTE3': Found header comment
+2026-03-07 15:44:04,733 - features.rule_generator.engine - INFO - Column 'ATTRIBUTE3': Found rule in row 4 below header: VARCHAR2(150 CHAR)
+2026-03-07 15:44:04,734 - features.rule_generator.engine - INFO - Column 'ATTRIBUTE3': Found rule in row 6 below header: Mandatory
+2026-03-07 15:44:04,735 - features.rule_generator.engine - INFO - Column 'ATTRIBUTE3': Total rules found: 4
+2026-03-07 15:44:04,736 - features.rule_generator.engine - INFO - Column 'ATTRIBUTE4': Found header comment
+2026-03-07 15:44:04,737 - features.rule_generator.engine - INFO - Column 'ATTRIBUTE4': Found rule in row 4 below header: VARCHAR2(150 CHAR)
+2026-03-07 15:44:04,738 - features.rule_generator.engine - INFO - Column 'ATTRIBUTE4': Found rule in row 6 below header: Mandatory
+2026-03-07 15:44:04,741 - features.rule_generator.engine - INFO - Column 'ATTRIBUTE4': Total rules found: 4
+2026-03-07 15:44:04,741 - features.rule_generator.engine - INFO - Column 'Destination Type Code': Found header comment
+2026-03-07 15:44:04,743 - features.rule_generator.engine - INFO - Column 'Destination Type Code': Found rule in row 4 below header: VARCHAR2(25 CHAR)
+2026-03-07 15:44:04,744 - features.rule_generator.engine - INFO - Column 'Destination Type Code': Found rule in row 6 below header: Mandatory
+2026-03-07 15:44:04,745 - features.rule_generator.engine - INFO - Column 'Destination Type Code': Total rules found: 4
+2026-03-07 15:44:04,746 - features.rule_generator.engine - INFO - Column 'Inspection Required': Found header comment
+2026-03-07 15:44:04,747 - features.rule_generator.engine - INFO - Column 'Inspection Required': Found rule in row 4 below header: VARCHAR2(1 CHAR)
+2026-03-07 15:44:04,747 - features.rule_generator.engine - INFO - Column 'Inspection Required': Found rule in row 7 below header: Inspection Required
+2026-03-07 15:44:04,748 - features.rule_generator.engine - INFO - Column 'Inspection Required': Total rules found: 4
+2026-03-07 15:44:04,749 - features.rule_generator.engine - INFO - Column 'Requested Delivery Date': Found header comment
+2026-03-07 15:44:04,749 - features.rule_generator.engine - INFO - Column 'Requested Delivery Date': Found rule in row 1 above header: Charge Account Segments ( CIP / Expense / Asset Cl
+2026-03-07 15:44:04,750 - features.rule_generator.engine - INFO - Column 'Requested Delivery Date': Found rule in row 4 below header: DATE
+2026-03-07 15:44:04,750 - features.rule_generator.engine - INFO - Column 'Requested Delivery Date': Found rule in row 6 below header: Mandatory
+2026-03-07 15:44:04,751 - features.rule_generator.engine - INFO - Column 'Requested Delivery Date': Found rule in row 7 below header: Requested Delivery Date
+2026-03-07 15:44:04,752 - features.rule_generator.engine - INFO - Column 'Requested Delivery Date': Total rules found: 6
+2026-03-07 15:44:04,753 - features.rule_generator.engine - INFO - Column 'Invoice Match Option': Found header comment
+2026-03-07 15:44:04,755 - features.rule_generator.engine - INFO - Column 'Invoice Match Option': Found rule in row 4 below header: VARCHAR2(25 CHAR)
+2026-03-07 15:44:04,755 - features.rule_generator.engine - INFO - Column 'Invoice Match Option': Total rules found: 3
+2026-03-07 15:44:04,758 - features.rule_generator.engine - INFO - Column 'Deliver-to Location': Found header comment
+2026-03-07 15:44:04,759 - features.rule_generator.engine - INFO - Column 'Deliver-to Location': Found rule in row 4 below header: VARCHAR2(60 CHAR)
+2026-03-07 15:44:04,760 - features.rule_generator.engine - INFO - Column 'Deliver-to Location': Found rule in row 6 below header: Mandatory
+2026-03-07 15:44:04,762 - features.rule_generator.engine - INFO - Column 'Deliver-to Location': Total rules found: 4
+2026-03-07 15:44:04,763 - features.rule_generator.engine - INFO - Column 'Subinventory': Found header comment
+2026-03-07 15:44:04,764 - features.rule_generator.engine - INFO - Column 'Subinventory': Found rule in row 4 below header: VARCHAR2(10 CHAR)
+2026-03-07 15:44:04,765 - features.rule_generator.engine - INFO - Column 'Subinventory': Total rules found: 3
+2026-03-07 15:44:04,766 - features.rule_generator.engine - INFO - Column 'CHARGE_ACCOUNT_SEGMENT1': Found header comment
+2026-03-07 15:44:04,766 - features.rule_generator.engine - INFO - Column 'CHARGE_ACCOUNT_SEGMENT1': Found rule in row 4 below header: VARCHAR2(25 CHAR)
+2026-03-07 15:44:04,767 - features.rule_generator.engine - INFO - Column 'CHARGE_ACCOUNT_SEGMENT1': Found rule in row 6 below header: Mandatory
+2026-03-07 15:44:04,767 - features.rule_generator.engine - INFO - Column 'CHARGE_ACCOUNT_SEGMENT1': Found rule in row 7 below header: CHARGE_ACCOUNT_SEGMENT1
+2026-03-07 15:44:04,768 - features.rule_generator.engine - INFO - Column 'CHARGE_ACCOUNT_SEGMENT1': Total rules found: 5
+2026-03-07 15:44:04,768 - features.rule_generator.engine - INFO - Column 'CHARGE_ACCOUNT_SEGMENT2': Found header comment
+2026-03-07 15:44:04,768 - features.rule_generator.engine - INFO - Column 'CHARGE_ACCOUNT_SEGMENT2': Found rule in row 4 below header: VARCHAR2(25 CHAR)
+2026-03-07 15:44:04,769 - features.rule_generator.engine - INFO - Column 'CHARGE_ACCOUNT_SEGMENT2': Found rule in row 6 below header: Mandatory
+2026-03-07 15:44:04,770 - features.rule_generator.engine - INFO - Column 'CHARGE_ACCOUNT_SEGMENT2': Found rule in row 7 below header: CHARGE_ACCOUNT_SEGMENT2
+2026-03-07 15:44:04,771 - features.rule_generator.engine - INFO - Column 'CHARGE_ACCOUNT_SEGMENT2': Total rules found: 5
+2026-03-07 15:44:04,772 - features.rule_generator.engine - INFO - Column 'CHARGE_ACCOUNT_SEGMENT3': Found header comment
+2026-03-07 15:44:04,773 - features.rule_generator.engine - INFO - Column 'CHARGE_ACCOUNT_SEGMENT3': Found rule in row 4 below header: VARCHAR2(25 CHAR)
+2026-03-07 15:44:04,774 - features.rule_generator.engine - INFO - Column 'CHARGE_ACCOUNT_SEGMENT3': Found rule in row 6 below header: Mandatory
+2026-03-07 15:44:04,775 - features.rule_generator.engine - INFO - Column 'CHARGE_ACCOUNT_SEGMENT3': Found rule in row 7 below header: CHARGE_ACCOUNT_SEGMENT3
+2026-03-07 15:44:04,777 - features.rule_generator.engine - INFO - Column 'CHARGE_ACCOUNT_SEGMENT3': Total rules found: 5
+2026-03-07 15:44:04,778 - features.rule_generator.engine - INFO - Column 'CHARGE_ACCOUNT_SEGMENT4': Found header comment
+2026-03-07 15:44:04,779 - features.rule_generator.engine - INFO - Column 'CHARGE_ACCOUNT_SEGMENT4': Found rule in row 4 below header: VARCHAR2(25 CHAR)
+2026-03-07 15:44:04,780 - features.rule_generator.engine - INFO - Column 'CHARGE_ACCOUNT_SEGMENT4': Found rule in row 6 below header: Mandatory
+2026-03-07 15:44:04,780 - features.rule_generator.engine - INFO - Column 'CHARGE_ACCOUNT_SEGMENT4': Found rule in row 7 below header: CHARGE_ACCOUNT_SEGMENT4
+2026-03-07 15:44:04,781 - features.rule_generator.engine - INFO - Column 'CHARGE_ACCOUNT_SEGMENT4': Total rules found: 5
+2026-03-07 15:44:04,782 - features.rule_generator.engine - INFO - Column 'CHARGE_ACCOUNT_SEGMENT5': Found header comment
+2026-03-07 15:44:04,782 - features.rule_generator.engine - INFO - Column 'CHARGE_ACCOUNT_SEGMENT5': Found rule in row 1 above header: Project Details
+2026-03-07 15:44:04,783 - features.rule_generator.engine - INFO - Column 'CHARGE_ACCOUNT_SEGMENT5': Found rule in row 4 below header: VARCHAR2(25 CHAR)
+2026-03-07 15:44:04,783 - features.rule_generator.engine - INFO - Column 'CHARGE_ACCOUNT_SEGMENT5': Found rule in row 6 below header: Mandatory
+2026-03-07 15:44:04,784 - features.rule_generator.engine - INFO - Column 'CHARGE_ACCOUNT_SEGMENT5': Found rule in row 7 below header: CHARGE_ACCOUNT_SEGMENT5
+2026-03-07 15:44:04,784 - features.rule_generator.engine - INFO - Column 'CHARGE_ACCOUNT_SEGMENT5': Total rules found: 6
+2026-03-07 15:44:04,785 - features.rule_generator.engine - INFO - Column 'CHARGE_ACCOUNT_SEGMENT6': Found header comment
+2026-03-07 15:44:04,785 - features.rule_generator.engine - INFO - Column 'CHARGE_ACCOUNT_SEGMENT6': Found rule in row 4 below header: VARCHAR2(25 CHAR)
+2026-03-07 15:44:04,786 - features.rule_generator.engine - INFO - Column 'CHARGE_ACCOUNT_SEGMENT6': Found rule in row 6 below header: Mandatory
+2026-03-07 15:44:04,786 - features.rule_generator.engine - INFO - Column 'CHARGE_ACCOUNT_SEGMENT6': Found rule in row 7 below header: CHARGE_ACCOUNT_SEGMENT6
+2026-03-07 15:44:04,787 - features.rule_generator.engine - INFO - Column 'CHARGE_ACCOUNT_SEGMENT6': Total rules found: 5
+2026-03-07 15:44:04,788 - features.rule_generator.engine - INFO - Column 'CHARGE_ACCOUNT_SEGMENT7': Found header comment
+2026-03-07 15:44:04,789 - features.rule_generator.engine - INFO - Column 'CHARGE_ACCOUNT_SEGMENT7': Found rule in row 4 below header: VARCHAR2(25 CHAR)
+2026-03-07 15:44:04,789 - features.rule_generator.engine - INFO - Column 'CHARGE_ACCOUNT_SEGMENT7': Found rule in row 6 below header: Mandatory
+2026-03-07 15:44:04,790 - features.rule_generator.engine - INFO - Column 'CHARGE_ACCOUNT_SEGMENT7': Found rule in row 7 below header: CHARGE_ACCOUNT_SEGMENT7
+2026-03-07 15:44:04,791 - features.rule_generator.engine - INFO - Column 'CHARGE_ACCOUNT_SEGMENT7': Total rules found: 5
+2026-03-07 15:44:04,792 - features.rule_generator.engine - INFO - Column 'CHARGE_ACCOUNT_SEGMENT8': Found header comment
+2026-03-07 15:44:04,793 - features.rule_generator.engine - INFO - Column 'CHARGE_ACCOUNT_SEGMENT8': Found rule in row 4 below header: VARCHAR2(25 CHAR)
+2026-03-07 15:44:04,794 - features.rule_generator.engine - INFO - Column 'CHARGE_ACCOUNT_SEGMENT8': Found rule in row 6 below header: Mandatory
+2026-03-07 15:44:04,795 - features.rule_generator.engine - INFO - Column 'CHARGE_ACCOUNT_SEGMENT8': Found rule in row 7 below header: CHARGE_ACCOUNT_SEGMENT8
+2026-03-07 15:44:04,796 - features.rule_generator.engine - INFO - Column 'CHARGE_ACCOUNT_SEGMENT8': Total rules found: 5
+2026-03-07 15:44:04,797 - features.rule_generator.engine - INFO - Column 'Project Number': Found header comment
+2026-03-07 15:44:04,797 - features.rule_generator.engine - INFO - Column 'Project Number': Found rule in row 4 below header: VARCHAR2(240 CHAR)
+2026-03-07 15:44:04,798 - features.rule_generator.engine - INFO - Column 'Project Number': Found rule in row 6 below header: Mandatory
+2026-03-07 15:44:04,798 - features.rule_generator.engine - INFO - Column 'Project Number': Found rule in row 7 below header: Project Number
+2026-03-07 15:44:04,799 - features.rule_generator.engine - INFO - Column 'Project Number': Total rules found: 5
+2026-03-07 15:44:04,799 - features.rule_generator.engine - INFO - Column 'Task Number': Found header comment
+2026-03-07 15:44:04,800 - features.rule_generator.engine - INFO - Column 'Task Number': Found rule in row 4 below header: VARCHAR2(100 CHAR)
+2026-03-07 15:44:04,801 - features.rule_generator.engine - INFO - Column 'Task Number': Found rule in row 5 below header: Project Accounting
+task number
+2026-03-07 15:44:04,801 - features.rule_generator.engine - INFO - Column 'Task Number': Found rule in row 6 below header: Mandatory
+2026-03-07 15:44:04,802 - features.rule_generator.engine - INFO - Column 'Task Number': Found rule in row 7 below header: Task Number
+2026-03-07 15:44:04,802 - features.rule_generator.engine - INFO - Column 'Task Number': Total rules found: 6
+2026-03-07 15:44:04,803 - features.rule_generator.engine - INFO - Column 'Expenditure Item Date': Found header comment
+2026-03-07 15:44:04,803 - features.rule_generator.engine - INFO - Column 'Expenditure Item Date': Found rule in row 4 below header: DATE
+2026-03-07 15:44:04,804 - features.rule_generator.engine - INFO - Column 'Expenditure Item Date': Found rule in row 5 below header: Date of the project-related
+expenditure transactio
+2026-03-07 15:44:04,805 - features.rule_generator.engine - INFO - Column 'Expenditure Item Date': Found rule in row 6 below header: Mandatory
+2026-03-07 15:44:04,806 - features.rule_generator.engine - INFO - Column 'Expenditure Item Date': Found rule in row 7 below header: Expenditure Item Date
+2026-03-07 15:44:04,806 - features.rule_generator.engine - INFO - Column 'Expenditure Item Date': Total rules found: 6
+2026-03-07 15:44:04,807 - features.rule_generator.engine - INFO - Column 'Expenditure Type': Found header comment
+2026-03-07 15:44:04,808 - features.rule_generator.engine - INFO - Column 'Expenditure Type': Found rule in row 4 below header: VARCHAR2(240 CHAR)
+2026-03-07 15:44:04,809 - features.rule_generator.engine - INFO - Column 'Expenditure Type': Found rule in row 6 below header: Mandatory
+2026-03-07 15:44:04,811 - features.rule_generator.engine - INFO - Column 'Expenditure Type': Total rules found: 4
+2026-03-07 15:44:04,811 - features.rule_generator.engine - INFO - Column 'Expenditure Organization': Found header comment
+2026-03-07 15:44:04,812 - features.rule_generator.engine - INFO - Column 'Expenditure Organization': Found rule in row 4 below header: VARCHAR2(240 CHAR)
+2026-03-07 15:44:04,812 - features.rule_generator.engine - INFO - Column 'Expenditure Organization': Found rule in row 6 below header: Mandatory
+2026-03-07 15:44:04,813 - features.rule_generator.engine - INFO - Column 'Expenditure Organization': Total rules found: 4
+2026-03-07 15:44:04,813 - features.rule_generator.engine - INFO - Column 'Budget Date': Found header comment
+2026-03-07 15:44:04,814 - features.rule_generator.engine - INFO - Column 'Budget Date': Found rule in row 4 below header: DATE
+2026-03-07 15:44:04,814 - features.rule_generator.engine - INFO - Column 'Budget Date': Found rule in row 5 below header: Provide in YYYY/MM/DD format
+2026-03-07 15:44:04,815 - features.rule_generator.engine - INFO - Column 'Budget Date': Found rule in row 6 below header: Mandatory
+2026-03-07 15:44:04,816 - features.rule_generator.engine - INFO - Column 'Budget Date': Found rule in row 7 below header: Budget Date
+2026-03-07 15:44:04,816 - features.rule_generator.engine - INFO - Column 'Budget Date': Total rules found: 6
+2026-03-07 15:44:04,817 - features.rule_generator.engine - INFO - === SCAN COMPLETE: Found rules for 46/46 columns ===
+2026-03-07 15:44:04,817 - features.rule_generator.ui - INFO - Found rules for 46 columns
+2026-03-07 15:44:11,494 - httpx - INFO - HTTP Request: POST https://datainfa-azure.openai.azure.com/openai/deployments/gpt-4o-mini/chat/completions?api-version=2024-12-01-preview "HTTP/1.1 200 OK"
+2026-03-07 15:44:12,522 - features.rule_generator.engine - INFO - Column '* Interface Header Key' marked as mandatory (contains *)
+2026-03-07 15:44:12,524 - features.rule_generator.engine - INFO - Column '* Interface Header Key' marked as unique
+2026-03-07 15:44:12,525 - features.rule_generator.engine - INFO - Extracted from '* Interface Header Key': Type=VARCHAR2, MaxLength=50
+2026-03-07 15:44:12,526 - features.rule_generator.engine - INFO - Extracted from '* Interface Header Key': Type=VARCHAR2, MaxLength=50
+2026-03-07 15:44:12,527 - features.rule_generator.engine - INFO - Extracted from '* Interface Header Key': Type=VARCHAR2, MaxLength=50
+2026-03-07 15:44:15,541 - httpx - INFO - HTTP Request: POST https://datainfa-azure.openai.azure.com/openai/deployments/gpt-4o-mini/chat/completions?api-version=2024-12-01-preview "HTTP/1.1 200 OK"
+2026-03-07 15:44:16,549 - features.rule_generator.engine - INFO - Column '* Action' marked as mandatory (contains *)
+2026-03-07 15:44:16,550 - features.rule_generator.engine - INFO - Column '* Action' marked as mandatory (keyword found)
+2026-03-07 15:44:16,551 - features.rule_generator.engine - INFO - Extracted from '* Action': Type=VARCHAR2, MaxLength=25
+2026-03-07 15:44:16,552 - features.rule_generator.engine - INFO - Extracted from '* Action': Type=VARCHAR2, MaxLength=25
+2026-03-07 15:44:16,556 - features.rule_generator.engine - INFO - Extracted from '* Action': Type=VARCHAR2, MaxLength=25
+2026-03-07 15:44:19,128 - httpx - INFO - HTTP Request: POST https://datainfa-azure.openai.azure.com/openai/deployments/gpt-4o-mini/chat/completions?api-version=2024-12-01-preview "HTTP/1.1 200 OK"
+2026-03-07 15:44:20,134 - features.rule_generator.engine - INFO - Column 'Batch ID' marked as unique
+2026-03-07 15:44:22,832 - httpx - INFO - HTTP Request: POST https://datainfa-azure.openai.azure.com/openai/deployments/gpt-4o-mini/chat/completions?api-version=2024-12-01-preview "HTTP/1.1 200 OK"
+2026-03-07 15:44:23,845 - features.rule_generator.engine - INFO - Extracted from 'Import Source': Type=VARCHAR2, MaxLength=25
+2026-03-07 15:44:23,847 - features.rule_generator.engine - INFO - Extracted from 'Import Source': Type=VARCHAR2, MaxLength=25
+2026-03-07 15:44:23,848 - features.rule_generator.engine - INFO - Extracted from 'Import Source': Type=VARCHAR2, MaxLength=25
+2026-03-07 15:44:26,497 - httpx - INFO - HTTP Request: POST https://datainfa-azure.openai.azure.com/openai/deployments/gpt-4o-mini/chat/completions?api-version=2024-12-01-preview "HTTP/1.1 200 OK"
+2026-03-07 15:44:27,505 - features.rule_generator.engine - INFO - Column 'Approval Action' marked as mandatory (keyword found)
+2026-03-07 15:44:27,509 - features.rule_generator.engine - INFO - Extracted from 'Approval Action': Type=VARCHAR2, MaxLength=25
+2026-03-07 15:44:27,511 - features.rule_generator.engine - INFO - Extracted from 'Approval Action': Type=VARCHAR2, MaxLength=25
+2026-03-07 15:44:27,512 - features.rule_generator.engine - INFO - Extracted from 'Approval Action': Type=VARCHAR2, MaxLength=25
+2026-03-07 15:44:30,798 - httpx - INFO - HTTP Request: POST https://datainfa-azure.openai.azure.com/openai/deployments/gpt-4o-mini/chat/completions?api-version=2024-12-01-preview "HTTP/1.1 200 OK"
+2026-03-07 15:44:31,806 - features.rule_generator.engine - INFO - Column 'Document Type Code' marked as mandatory (keyword found)
+2026-03-07 15:44:31,809 - features.rule_generator.engine - INFO - Extracted from 'Document Type Code': Type=VARCHAR2, MaxLength=25
+2026-03-07 15:44:31,811 - features.rule_generator.engine - INFO - Extracted from 'Document Type Code': Type=VARCHAR2, MaxLength=25
+2026-03-07 15:44:31,812 - features.rule_generator.engine - INFO - Extracted from 'Document Type Code': Type=VARCHAR2, MaxLength=25
+2026-03-07 15:44:33,984 - httpx - INFO - HTTP Request: POST https://datainfa-azure.openai.azure.com/openai/deployments/gpt-4o-mini/chat/completions?api-version=2024-12-01-preview "HTTP/1.1 200 OK"
+2026-03-07 15:44:34,995 - features.rule_generator.engine - INFO - Column 'Procurement BU' marked as mandatory (keyword found)
+2026-03-07 15:44:34,998 - features.rule_generator.engine - INFO - Extracted from 'Procurement BU': Type=VARCHAR2, MaxLength=240
+2026-03-07 15:44:34,999 - features.rule_generator.engine - INFO - Extracted from 'Procurement BU': Type=VARCHAR2, MaxLength=240
+2026-03-07 15:44:35,000 - features.rule_generator.engine - INFO - Extracted from 'Procurement BU': Type=VARCHAR2, MaxLength=240
+2026-03-07 15:44:38,890 - httpx - INFO - HTTP Request: POST https://datainfa-azure.openai.azure.com/openai/deployments/gpt-4o-mini/chat/completions?api-version=2024-12-01-preview "HTTP/1.1 200 OK"
+2026-03-07 15:44:39,898 - features.rule_generator.engine - INFO - Column 'Requisitioning BU' marked as mandatory (keyword found)
+2026-03-07 15:44:39,900 - features.rule_generator.engine - INFO - Extracted from 'Requisitioning BU': Type=VARCHAR2, MaxLength=240
+2026-03-07 15:44:39,902 - features.rule_generator.engine - INFO - Extracted from 'Requisitioning BU': Type=VARCHAR2, MaxLength=240
+2026-03-07 15:44:39,905 - features.rule_generator.engine - INFO - Extracted from 'Requisitioning BU': Type=VARCHAR2, MaxLength=240
+2026-03-07 15:44:42,575 - httpx - INFO - HTTP Request: POST https://datainfa-azure.openai.azure.com/openai/deployments/gpt-4o-mini/chat/completions?api-version=2024-12-01-preview "HTTP/1.1 200 OK"
+2026-03-07 15:44:43,583 - features.rule_generator.engine - INFO - Column 'Sold-to Legal Entity' marked as mandatory (keyword found)
+2026-03-07 15:44:43,586 - features.rule_generator.engine - INFO - Extracted from 'Sold-to Legal Entity': Type=VARCHAR2, MaxLength=240
+2026-03-07 15:44:43,588 - features.rule_generator.engine - INFO - Extracted from 'Sold-to Legal Entity': Type=VARCHAR2, MaxLength=240
+2026-03-07 15:44:43,590 - features.rule_generator.engine - INFO - Extracted from 'Sold-to Legal Entity': Type=VARCHAR2, MaxLength=240
+2026-03-07 15:44:46,260 - httpx - INFO - HTTP Request: POST https://datainfa-azure.openai.azure.com/openai/deployments/gpt-4o-mini/chat/completions?api-version=2024-12-01-preview "HTTP/1.1 200 OK"
+2026-03-07 15:44:47,267 - features.rule_generator.engine - INFO - Column 'Bill-to BU' marked as mandatory (keyword found)
+2026-03-07 15:44:47,268 - features.rule_generator.engine - INFO - Extracted from 'Bill-to BU': Type=VARCHAR2, MaxLength=240
+2026-03-07 15:44:47,269 - features.rule_generator.engine - INFO - Extracted from 'Bill-to BU': Type=VARCHAR2, MaxLength=240
+2026-03-07 15:44:47,270 - features.rule_generator.engine - INFO - Extracted from 'Bill-to BU': Type=VARCHAR2, MaxLength=240
+2026-03-07 15:44:50,463 - httpx - INFO - HTTP Request: POST https://datainfa-azure.openai.azure.com/openai/deployments/gpt-4o-mini/chat/completions?api-version=2024-12-01-preview "HTTP/1.1 200 OK"
+2026-03-07 15:44:51,473 - features.rule_generator.engine - INFO - Column 'Buyer' marked as mandatory (keyword found)
+2026-03-07 15:44:51,476 - features.rule_generator.engine - INFO - Extracted from 'Buyer': Type=VARCHAR2, MaxLength=2000
+2026-03-07 15:44:51,482 - features.rule_generator.engine - INFO - Extracted from 'Buyer': Type=VARCHAR2, MaxLength=2000
+2026-03-07 15:44:51,485 - features.rule_generator.engine - INFO - Extracted from 'Buyer': Type=VARCHAR2, MaxLength=2000
+2026-03-07 15:44:55,067 - httpx - INFO - HTTP Request: POST https://datainfa-azure.openai.azure.com/openai/deployments/gpt-4o-mini/chat/completions?api-version=2024-12-01-preview "HTTP/1.1 200 OK"
+2026-03-07 15:44:56,074 - features.rule_generator.engine - INFO - Column 'Currency Code' marked as mandatory (keyword found)
+2026-03-07 15:44:56,077 - features.rule_generator.engine - INFO - Extracted from 'Currency Code': Type=VARCHAR2, MaxLength=15
+2026-03-07 15:44:56,078 - features.rule_generator.engine - INFO - Extracted from 'Currency Code': Type=VARCHAR2, MaxLength=15
+2026-03-07 15:44:56,078 - features.rule_generator.engine - INFO - Extracted from 'Currency Code': Type=VARCHAR2, MaxLength=15
+2026-03-07 15:45:00,813 - httpx - INFO - HTTP Request: POST https://datainfa-azure.openai.azure.com/openai/deployments/gpt-4o-mini/chat/completions?api-version=2024-12-01-preview "HTTP/1.1 200 OK"
+2026-03-07 15:45:01,824 - features.rule_generator.engine - INFO - Column 'Bill-to Location' marked as mandatory (keyword found)
+2026-03-07 15:45:01,827 - features.rule_generator.engine - INFO - Extracted from 'Bill-to Location': Type=VARCHAR2, MaxLength=60
+2026-03-07 15:45:01,828 - features.rule_generator.engine - INFO - Extracted from 'Bill-to Location': Type=VARCHAR2, MaxLength=60
+2026-03-07 15:45:01,829 - features.rule_generator.engine - INFO - Extracted from 'Bill-to Location': Type=VARCHAR2, MaxLength=60
+2026-03-07 15:45:04,843 - httpx - INFO - HTTP Request: POST https://datainfa-azure.openai.azure.com/openai/deployments/gpt-4o-mini/chat/completions?api-version=2024-12-01-preview "HTTP/1.1 200 OK"
+2026-03-07 15:45:05,849 - features.rule_generator.engine - INFO - Column 'Ship-to Location' marked as mandatory (keyword found)
+2026-03-07 15:45:05,852 - features.rule_generator.engine - INFO - Extracted from 'Ship-to Location': Type=VARCHAR2, MaxLength=60
+2026-03-07 15:45:05,857 - features.rule_generator.engine - INFO - Extracted from 'Ship-to Location': Type=VARCHAR2, MaxLength=60
+2026-03-07 15:45:05,858 - features.rule_generator.engine - INFO - Extracted from 'Ship-to Location': Type=VARCHAR2, MaxLength=60
+2026-03-07 15:45:08,312 - httpx - INFO - HTTP Request: POST https://datainfa-azure.openai.azure.com/openai/deployments/gpt-4o-mini/chat/completions?api-version=2024-12-01-preview "HTTP/1.1 200 OK"
+2026-03-07 15:45:09,325 - features.rule_generator.engine - INFO - Column 'Supplier' marked as mandatory (keyword found)
+2026-03-07 15:45:09,329 - features.rule_generator.engine - INFO - Extracted from 'Supplier': Type=VARCHAR2, MaxLength=360
+2026-03-07 15:45:09,330 - features.rule_generator.engine - INFO - Extracted from 'Supplier': Type=VARCHAR2, MaxLength=360
+2026-03-07 15:45:09,332 - features.rule_generator.engine - INFO - Extracted from 'Supplier': Type=VARCHAR2, MaxLength=360
+2026-03-07 15:45:11,788 - httpx - INFO - HTTP Request: POST https://datainfa-azure.openai.azure.com/openai/deployments/gpt-4o-mini/chat/completions?api-version=2024-12-01-preview "HTTP/1.1 200 OK"
+2026-03-07 15:45:12,796 - features.rule_generator.engine - INFO - Column 'Supplier Site' marked as mandatory (keyword found)
+2026-03-07 15:45:12,799 - features.rule_generator.engine - INFO - Extracted from 'Supplier Site': Type=VARCHAR2, MaxLength=240
+2026-03-07 15:45:12,800 - features.rule_generator.engine - INFO - Extracted from 'Supplier Site': Type=VARCHAR2, MaxLength=240
+2026-03-07 15:45:12,801 - features.rule_generator.engine - INFO - Extracted from 'Supplier Site': Type=VARCHAR2, MaxLength=240
+2026-03-07 15:45:15,754 - httpx - INFO - HTTP Request: POST https://datainfa-azure.openai.azure.com/openai/deployments/gpt-4o-mini/chat/completions?api-version=2024-12-01-preview "HTTP/1.1 200 OK"
+2026-03-07 15:45:16,763 - features.rule_generator.engine - INFO - Column 'Line' marked as mandatory (keyword found)
+2026-03-07 15:45:20,164 - httpx - INFO - HTTP Request: POST https://datainfa-azure.openai.azure.com/openai/deployments/gpt-4o-mini/chat/completions?api-version=2024-12-01-preview "HTTP/1.1 200 OK"
+2026-03-07 15:45:21,174 - features.rule_generator.engine - INFO - Column 'Line Type' marked as mandatory (keyword found)
+2026-03-07 15:45:21,176 - features.rule_generator.engine - INFO - Extracted from 'Line Type': Type=VARCHAR2, MaxLength=30
+2026-03-07 15:45:21,177 - features.rule_generator.engine - INFO - Extracted from 'Line Type': Type=VARCHAR2, MaxLength=30
+2026-03-07 15:45:21,178 - features.rule_generator.engine - INFO - Extracted from 'Line Type': Type=VARCHAR2, MaxLength=30
+2026-03-07 15:45:24,046 - httpx - INFO - HTTP Request: POST https://datainfa-azure.openai.azure.com/openai/deployments/gpt-4o-mini/chat/completions?api-version=2024-12-01-preview "HTTP/1.1 200 OK"
+2026-03-07 15:45:25,056 - features.rule_generator.engine - INFO - Column 'Item' marked as mandatory (keyword found)
+2026-03-07 15:45:25,061 - features.rule_generator.engine - INFO - Extracted from 'Item': Type=VARCHAR2, MaxLength=300
+2026-03-07 15:45:25,063 - features.rule_generator.engine - INFO - Extracted from 'Item': Type=VARCHAR2, MaxLength=300
+2026-03-07 15:45:25,063 - features.rule_generator.engine - INFO - Extracted from 'Item': Type=VARCHAR2, MaxLength=300
+2026-03-07 15:45:27,810 - httpx - INFO - HTTP Request: POST https://datainfa-azure.openai.azure.com/openai/deployments/gpt-4o-mini/chat/completions?api-version=2024-12-01-preview "HTTP/1.1 200 OK"
+2026-03-07 15:45:28,817 - features.rule_generator.engine - INFO - Column 'Item Description' marked as mandatory (keyword found)
+2026-03-07 15:45:28,821 - features.rule_generator.engine - INFO - Extracted from 'Item Description': Type=VARCHAR2, MaxLength=240
+2026-03-07 15:45:28,825 - features.rule_generator.engine - INFO - Extracted from 'Item Description': Type=VARCHAR2, MaxLength=240
+2026-03-07 15:45:28,827 - features.rule_generator.engine - INFO - Extracted from 'Item Description': Type=VARCHAR2, MaxLength=240
+2026-03-07 15:45:31,527 - httpx - INFO - HTTP Request: POST https://datainfa-azure.openai.azure.com/openai/deployments/gpt-4o-mini/chat/completions?api-version=2024-12-01-preview "HTTP/1.1 200 OK"
+2026-03-07 15:45:32,533 - features.rule_generator.engine - INFO - Column 'Quantity' marked as mandatory (keyword found)
+2026-03-07 15:45:35,009 - httpx - INFO - HTTP Request: POST https://datainfa-azure.openai.azure.com/openai/deployments/gpt-4o-mini/chat/completions?api-version=2024-12-01-preview "HTTP/1.1 200 OK"
+2026-03-07 15:45:36,013 - features.rule_generator.engine - INFO - Column 'UOM' marked as mandatory (keyword found)
+2026-03-07 15:45:36,015 - features.rule_generator.engine - INFO - Extracted from 'UOM': Type=VARCHAR2, MaxLength=25
+2026-03-07 15:45:36,022 - features.rule_generator.engine - INFO - Extracted from 'UOM': Type=VARCHAR2, MaxLength=25
+2026-03-07 15:45:36,024 - features.rule_generator.engine - INFO - Extracted from 'UOM': Type=VARCHAR2, MaxLength=25
+2026-03-07 15:45:38,933 - httpx - INFO - HTTP Request: POST https://datainfa-azure.openai.azure.com/openai/deployments/gpt-4o-mini/chat/completions?api-version=2024-12-01-preview "HTTP/1.1 200 OK"
+2026-03-07 15:45:39,941 - features.rule_generator.engine - INFO - Column 'Price' marked as mandatory (keyword found)
+2026-03-07 15:45:42,764 - httpx - INFO - HTTP Request: POST https://datainfa-azure.openai.azure.com/openai/deployments/gpt-4o-mini/chat/completions?api-version=2024-12-01-preview "HTTP/1.1 200 OK"
+2026-03-07 15:45:43,772 - features.rule_generator.engine - INFO - Column 'ATTRIBUTE2' marked as mandatory (keyword found)
+2026-03-07 15:45:43,774 - features.rule_generator.engine - INFO - Extracted from 'ATTRIBUTE2': Type=VARCHAR2, MaxLength=150
+2026-03-07 15:45:43,775 - features.rule_generator.engine - INFO - Extracted from 'ATTRIBUTE2': Type=VARCHAR2, MaxLength=150
+2026-03-07 15:45:43,776 - features.rule_generator.engine - INFO - Extracted from 'ATTRIBUTE2': Type=VARCHAR2, MaxLength=150
+2026-03-07 15:45:46,479 - httpx - INFO - HTTP Request: POST https://datainfa-azure.openai.azure.com/openai/deployments/gpt-4o-mini/chat/completions?api-version=2024-12-01-preview "HTTP/1.1 200 OK"
+2026-03-07 15:45:47,484 - features.rule_generator.engine - INFO - Column 'ATTRIBUTE3' marked as mandatory (keyword found)
+2026-03-07 15:45:47,489 - features.rule_generator.engine - INFO - Extracted from 'ATTRIBUTE3': Type=VARCHAR2, MaxLength=150
+2026-03-07 15:45:47,490 - features.rule_generator.engine - INFO - Extracted from 'ATTRIBUTE3': Type=VARCHAR2, MaxLength=150
+2026-03-07 15:45:47,491 - features.rule_generator.engine - INFO - Extracted from 'ATTRIBUTE3': Type=VARCHAR2, MaxLength=150
+2026-03-07 15:45:49,850 - httpx - INFO - HTTP Request: POST https://datainfa-azure.openai.azure.com/openai/deployments/gpt-4o-mini/chat/completions?api-version=2024-12-01-preview "HTTP/1.1 200 OK"
+2026-03-07 15:45:50,859 - features.rule_generator.engine - INFO - Column 'ATTRIBUTE4' marked as mandatory (keyword found)
+2026-03-07 15:45:50,862 - features.rule_generator.engine - INFO - Extracted from 'ATTRIBUTE4': Type=VARCHAR2, MaxLength=150
+2026-03-07 15:45:50,863 - features.rule_generator.engine - INFO - Extracted from 'ATTRIBUTE4': Type=VARCHAR2, MaxLength=150
+2026-03-07 15:45:50,864 - features.rule_generator.engine - INFO - Extracted from 'ATTRIBUTE4': Type=VARCHAR2, MaxLength=150
+2026-03-07 15:45:54,561 - httpx - INFO - HTTP Request: POST https://datainfa-azure.openai.azure.com/openai/deployments/gpt-4o-mini/chat/completions?api-version=2024-12-01-preview "HTTP/1.1 200 OK"
+2026-03-07 15:45:55,566 - features.rule_generator.engine - INFO - Column 'Destination Type Code' marked as mandatory (keyword found)
+2026-03-07 15:45:55,567 - features.rule_generator.engine - INFO - Extracted from 'Destination Type Code': Type=VARCHAR2, MaxLength=25
+2026-03-07 15:45:55,571 - features.rule_generator.engine - INFO - Extracted from 'Destination Type Code': Type=VARCHAR2, MaxLength=25
+2026-03-07 15:45:55,572 - features.rule_generator.engine - INFO - Extracted from 'Destination Type Code': Type=VARCHAR2, MaxLength=25
+2026-03-07 15:45:59,017 - httpx - INFO - HTTP Request: POST https://datainfa-azure.openai.azure.com/openai/deployments/gpt-4o-mini/chat/completions?api-version=2024-12-01-preview "HTTP/1.1 200 OK"
+2026-03-07 15:46:00,025 - features.rule_generator.engine - INFO - Column 'Inspection Required' marked as mandatory (keyword found)
+2026-03-07 15:46:00,027 - features.rule_generator.engine - INFO - Extracted from 'Inspection Required': Type=VARCHAR2, MaxLength=1
+2026-03-07 15:46:00,028 - features.rule_generator.engine - INFO - Extracted from 'Inspection Required': Type=VARCHAR2, MaxLength=1
+2026-03-07 15:46:00,029 - features.rule_generator.engine - INFO - Extracted from 'Inspection Required': Type=VARCHAR2, MaxLength=1
+2026-03-07 15:46:00,030 - features.rule_generator.engine - INFO - Extracted allowed values from 'Inspection Required': Yes/No
+2026-03-07 15:46:03,335 - httpx - INFO - HTTP Request: POST https://datainfa-azure.openai.azure.com/openai/deployments/gpt-4o-mini/chat/completions?api-version=2024-12-01-preview "HTTP/1.1 200 OK"
+2026-03-07 15:46:04,342 - features.rule_generator.engine - INFO - Column 'Requested Delivery Date' marked as mandatory (keyword found)
+2026-03-07 15:46:06,954 - httpx - INFO - HTTP Request: POST https://datainfa-azure.openai.azure.com/openai/deployments/gpt-4o-mini/chat/completions?api-version=2024-12-01-preview "HTTP/1.1 200 OK"
+2026-03-07 15:46:07,960 - features.rule_generator.engine - INFO - Column 'Invoice Match Option' marked as mandatory (keyword found)
+2026-03-07 15:46:07,962 - features.rule_generator.engine - INFO - Extracted from 'Invoice Match Option': Type=VARCHAR2, MaxLength=25
+2026-03-07 15:46:07,963 - features.rule_generator.engine - INFO - Extracted from 'Invoice Match Option': Type=VARCHAR2, MaxLength=25
+2026-03-07 15:46:07,964 - features.rule_generator.engine - INFO - Extracted from 'Invoice Match Option': Type=VARCHAR2, MaxLength=25
+2026-03-07 15:46:10,933 - httpx - INFO - HTTP Request: POST https://datainfa-azure.openai.azure.com/openai/deployments/gpt-4o-mini/chat/completions?api-version=2024-12-01-preview "HTTP/1.1 200 OK"
+2026-03-07 15:46:11,941 - features.rule_generator.engine - INFO - Column 'Deliver-to Location' marked as mandatory (keyword found)
+2026-03-07 15:46:11,942 - features.rule_generator.engine - INFO - Extracted from 'Deliver-to Location': Type=VARCHAR2, MaxLength=60
+2026-03-07 15:46:11,943 - features.rule_generator.engine - INFO - Extracted from 'Deliver-to Location': Type=VARCHAR2, MaxLength=60
+2026-03-07 15:46:11,944 - features.rule_generator.engine - INFO - Extracted from 'Deliver-to Location': Type=VARCHAR2, MaxLength=60
+2026-03-07 15:46:14,940 - httpx - INFO - HTTP Request: POST https://datainfa-azure.openai.azure.com/openai/deployments/gpt-4o-mini/chat/completions?api-version=2024-12-01-preview "HTTP/1.1 200 OK"
+2026-03-07 15:46:15,947 - features.rule_generator.engine - INFO - Extracted from 'Subinventory': Type=VARCHAR2, MaxLength=10
+2026-03-07 15:46:15,950 - features.rule_generator.engine - INFO - Extracted from 'Subinventory': Type=VARCHAR2, MaxLength=10
+2026-03-07 15:46:15,951 - features.rule_generator.engine - INFO - Extracted from 'Subinventory': Type=VARCHAR2, MaxLength=10
+2026-03-07 15:46:19,032 - httpx - INFO - HTTP Request: POST https://datainfa-azure.openai.azure.com/openai/deployments/gpt-4o-mini/chat/completions?api-version=2024-12-01-preview "HTTP/1.1 200 OK"
+2026-03-07 15:46:20,042 - features.rule_generator.engine - INFO - Column 'CHARGE_ACCOUNT_SEGMENT1' marked as mandatory (keyword found)
+2026-03-07 15:46:20,045 - features.rule_generator.engine - INFO - Extracted from 'CHARGE_ACCOUNT_SEGMENT1': Type=VARCHAR2, MaxLength=25
+2026-03-07 15:46:20,046 - features.rule_generator.engine - INFO - Extracted from 'CHARGE_ACCOUNT_SEGMENT1': Type=VARCHAR2, MaxLength=25
+2026-03-07 15:46:20,047 - features.rule_generator.engine - INFO - Extracted from 'CHARGE_ACCOUNT_SEGMENT1': Type=VARCHAR2, MaxLength=25
+2026-03-07 15:46:22,831 - httpx - INFO - HTTP Request: POST https://datainfa-azure.openai.azure.com/openai/deployments/gpt-4o-mini/chat/completions?api-version=2024-12-01-preview "HTTP/1.1 200 OK"
+2026-03-07 15:46:23,840 - features.rule_generator.engine - INFO - Column 'CHARGE_ACCOUNT_SEGMENT2' marked as mandatory (keyword found)
+2026-03-07 15:46:23,843 - features.rule_generator.engine - INFO - Extracted from 'CHARGE_ACCOUNT_SEGMENT2': Type=VARCHAR2, MaxLength=25
+2026-03-07 15:46:23,844 - features.rule_generator.engine - INFO - Extracted from 'CHARGE_ACCOUNT_SEGMENT2': Type=VARCHAR2, MaxLength=25
+2026-03-07 15:46:23,845 - features.rule_generator.engine - INFO - Extracted from 'CHARGE_ACCOUNT_SEGMENT2': Type=VARCHAR2, MaxLength=25
+2026-03-07 15:46:26,617 - httpx - INFO - HTTP Request: POST https://datainfa-azure.openai.azure.com/openai/deployments/gpt-4o-mini/chat/completions?api-version=2024-12-01-preview "HTTP/1.1 200 OK"
+2026-03-07 15:46:27,626 - features.rule_generator.engine - INFO - Column 'CHARGE_ACCOUNT_SEGMENT3' marked as mandatory (keyword found)
+2026-03-07 15:46:27,628 - features.rule_generator.engine - INFO - Extracted from 'CHARGE_ACCOUNT_SEGMENT3': Type=VARCHAR2, MaxLength=25
+2026-03-07 15:46:27,630 - features.rule_generator.engine - INFO - Extracted from 'CHARGE_ACCOUNT_SEGMENT3': Type=VARCHAR2, MaxLength=25
+2026-03-07 15:46:27,631 - features.rule_generator.engine - INFO - Extracted from 'CHARGE_ACCOUNT_SEGMENT3': Type=VARCHAR2, MaxLength=25
+2026-03-07 15:46:30,431 - httpx - INFO - HTTP Request: POST https://datainfa-azure.openai.azure.com/openai/deployments/gpt-4o-mini/chat/completions?api-version=2024-12-01-preview "HTTP/1.1 200 OK"
+2026-03-07 15:46:31,440 - features.rule_generator.engine - INFO - Column 'CHARGE_ACCOUNT_SEGMENT4' marked as mandatory (keyword found)
+2026-03-07 15:46:31,442 - features.rule_generator.engine - INFO - Extracted from 'CHARGE_ACCOUNT_SEGMENT4': Type=VARCHAR2, MaxLength=25
+2026-03-07 15:46:31,442 - features.rule_generator.engine - INFO - Extracted from 'CHARGE_ACCOUNT_SEGMENT4': Type=VARCHAR2, MaxLength=25
+2026-03-07 15:46:31,444 - features.rule_generator.engine - INFO - Extracted from 'CHARGE_ACCOUNT_SEGMENT4': Type=VARCHAR2, MaxLength=25
+2026-03-07 15:46:34,073 - httpx - INFO - HTTP Request: POST https://datainfa-azure.openai.azure.com/openai/deployments/gpt-4o-mini/chat/completions?api-version=2024-12-01-preview "HTTP/1.1 200 OK"
+2026-03-07 15:46:35,081 - features.rule_generator.engine - INFO - Column 'CHARGE_ACCOUNT_SEGMENT5' marked as mandatory (keyword found)
+2026-03-07 15:46:35,084 - features.rule_generator.engine - INFO - Extracted from 'CHARGE_ACCOUNT_SEGMENT5': Type=VARCHAR2, MaxLength=25
+2026-03-07 15:46:35,086 - features.rule_generator.engine - INFO - Extracted from 'CHARGE_ACCOUNT_SEGMENT5': Type=VARCHAR2, MaxLength=25
+2026-03-07 15:46:35,088 - features.rule_generator.engine - INFO - Extracted from 'CHARGE_ACCOUNT_SEGMENT5': Type=VARCHAR2, MaxLength=25
+2026-03-07 15:46:37,444 - httpx - INFO - HTTP Request: POST https://datainfa-azure.openai.azure.com/openai/deployments/gpt-4o-mini/chat/completions?api-version=2024-12-01-preview "HTTP/1.1 200 OK"
+2026-03-07 15:46:38,455 - features.rule_generator.engine - INFO - Column 'CHARGE_ACCOUNT_SEGMENT6' marked as mandatory (keyword found)
+2026-03-07 15:46:38,458 - features.rule_generator.engine - INFO - Extracted from 'CHARGE_ACCOUNT_SEGMENT6': Type=VARCHAR2, MaxLength=25
+2026-03-07 15:46:38,460 - features.rule_generator.engine - INFO - Extracted from 'CHARGE_ACCOUNT_SEGMENT6': Type=VARCHAR2, MaxLength=25
+2026-03-07 15:46:38,461 - features.rule_generator.engine - INFO - Extracted from 'CHARGE_ACCOUNT_SEGMENT6': Type=VARCHAR2, MaxLength=25
+2026-03-07 15:46:41,278 - httpx - INFO - HTTP Request: POST https://datainfa-azure.openai.azure.com/openai/deployments/gpt-4o-mini/chat/completions?api-version=2024-12-01-preview "HTTP/1.1 200 OK"
+2026-03-07 15:46:42,284 - features.rule_generator.engine - INFO - Column 'CHARGE_ACCOUNT_SEGMENT7' marked as mandatory (keyword found)
+2026-03-07 15:46:42,289 - features.rule_generator.engine - INFO - Extracted from 'CHARGE_ACCOUNT_SEGMENT7': Type=VARCHAR2, MaxLength=25
+2026-03-07 15:46:42,290 - features.rule_generator.engine - INFO - Extracted from 'CHARGE_ACCOUNT_SEGMENT7': Type=VARCHAR2, MaxLength=25
+2026-03-07 15:46:42,291 - features.rule_generator.engine - INFO - Extracted from 'CHARGE_ACCOUNT_SEGMENT7': Type=VARCHAR2, MaxLength=25
+2026-03-07 15:46:45,249 - httpx - INFO - HTTP Request: POST https://datainfa-azure.openai.azure.com/openai/deployments/gpt-4o-mini/chat/completions?api-version=2024-12-01-preview "HTTP/1.1 200 OK"
+2026-03-07 15:46:46,262 - features.rule_generator.engine - INFO - Column 'CHARGE_ACCOUNT_SEGMENT8' marked as mandatory (keyword found)
+2026-03-07 15:46:46,265 - features.rule_generator.engine - INFO - Extracted from 'CHARGE_ACCOUNT_SEGMENT8': Type=VARCHAR2, MaxLength=25
+2026-03-07 15:46:46,267 - features.rule_generator.engine - INFO - Extracted from 'CHARGE_ACCOUNT_SEGMENT8': Type=VARCHAR2, MaxLength=25
+2026-03-07 15:46:46,268 - features.rule_generator.engine - INFO - Extracted from 'CHARGE_ACCOUNT_SEGMENT8': Type=VARCHAR2, MaxLength=25
+2026-03-07 15:46:50,086 - httpx - INFO - HTTP Request: POST https://datainfa-azure.openai.azure.com/openai/deployments/gpt-4o-mini/chat/completions?api-version=2024-12-01-preview "HTTP/1.1 200 OK"
+2026-03-07 15:46:51,095 - features.rule_generator.engine - INFO - Column 'Project Number' marked as mandatory (keyword found)
+2026-03-07 15:46:51,099 - features.rule_generator.engine - INFO - Extracted from 'Project Number': Type=VARCHAR2, MaxLength=240
+2026-03-07 15:46:51,101 - features.rule_generator.engine - INFO - Extracted from 'Project Number': Type=VARCHAR2, MaxLength=240
+2026-03-07 15:46:51,103 - features.rule_generator.engine - INFO - Extracted from 'Project Number': Type=VARCHAR2, MaxLength=240
+2026-03-07 15:46:54,260 - httpx - INFO - HTTP Request: POST https://datainfa-azure.openai.azure.com/openai/deployments/gpt-4o-mini/chat/completions?api-version=2024-12-01-preview "HTTP/1.1 200 OK"
+2026-03-07 15:46:55,271 - features.rule_generator.engine - INFO - Column 'Task Number' marked as mandatory (keyword found)
+2026-03-07 15:46:55,273 - features.rule_generator.engine - INFO - Extracted from 'Task Number': Type=VARCHAR2, MaxLength=100
+2026-03-07 15:46:55,274 - features.rule_generator.engine - INFO - Extracted from 'Task Number': Type=VARCHAR2, MaxLength=100
+2026-03-07 15:46:55,275 - features.rule_generator.engine - INFO - Extracted from 'Task Number': Type=VARCHAR2, MaxLength=100
+2026-03-07 15:46:58,972 - httpx - INFO - HTTP Request: POST https://datainfa-azure.openai.azure.com/openai/deployments/gpt-4o-mini/chat/completions?api-version=2024-12-01-preview "HTTP/1.1 200 OK"
+2026-03-07 15:46:59,980 - features.rule_generator.engine - INFO - Column 'Expenditure Item Date' marked as mandatory (keyword found)
+2026-03-07 15:47:03,476 - httpx - INFO - HTTP Request: POST https://datainfa-azure.openai.azure.com/openai/deployments/gpt-4o-mini/chat/completions?api-version=2024-12-01-preview "HTTP/1.1 200 OK"
+2026-03-07 15:47:04,488 - features.rule_generator.engine - INFO - Column 'Expenditure Type' marked as mandatory (keyword found)
+2026-03-07 15:47:04,490 - features.rule_generator.engine - INFO - Extracted from 'Expenditure Type': Type=VARCHAR2, MaxLength=240
+2026-03-07 15:47:04,491 - features.rule_generator.engine - INFO - Extracted from 'Expenditure Type': Type=VARCHAR2, MaxLength=240
+2026-03-07 15:47:04,493 - features.rule_generator.engine - INFO - Extracted from 'Expenditure Type': Type=VARCHAR2, MaxLength=240
+2026-03-07 15:47:07,778 - httpx - INFO - HTTP Request: POST https://datainfa-azure.openai.azure.com/openai/deployments/gpt-4o-mini/chat/completions?api-version=2024-12-01-preview "HTTP/1.1 200 OK"
+2026-03-07 15:47:08,788 - features.rule_generator.engine - INFO - Column 'Expenditure Organization' marked as mandatory (keyword found)
+2026-03-07 15:47:08,792 - features.rule_generator.engine - INFO - Extracted from 'Expenditure Organization': Type=VARCHAR2, MaxLength=240
+2026-03-07 15:47:08,794 - features.rule_generator.engine - INFO - Extracted from 'Expenditure Organization': Type=VARCHAR2, MaxLength=240
+2026-03-07 15:47:08,794 - features.rule_generator.engine - INFO - Extracted from 'Expenditure Organization': Type=VARCHAR2, MaxLength=240
+2026-03-07 15:47:11,865 - httpx - INFO - HTTP Request: POST https://datainfa-azure.openai.azure.com/openai/deployments/gpt-4o-mini/chat/completions?api-version=2024-12-01-preview "HTTP/1.1 200 OK"
+2026-03-07 15:47:12,876 - features.rule_generator.engine - INFO - Column 'Budget Date' marked as mandatory (keyword found)
+2026-03-07 15:47:15,343 - httpx - INFO - HTTP Request: POST https://datainfa-azure.openai.azure.com/openai/deployments/gpt-4o-mini/chat/completions?api-version=2024-12-01-preview "HTTP/1.1 200 OK"

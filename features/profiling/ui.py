@@ -1379,6 +1379,42 @@ def find_duplicate_groups(df, col):
     return groups
 
 
+def get_duplicate_count_values(df, col, max_items=5):
+    """Get top duplicate values with their counts in format: Value(count)
+    
+    Args:
+        df: DataFrame
+        col: Column name
+        max_items: Maximum number of duplicate values to return
+        
+    Returns:
+        String like "Ram(10), Shyam(8), John(5)" or "No duplicates"
+    """
+    if col not in df.columns:
+        return "N/A"
+    
+    try:
+        # Get value counts for duplicates only (count > 1)
+        value_counts = df[col].value_counts()
+        duplicates = value_counts[value_counts > 1]
+        
+        if len(duplicates) == 0:
+            return "No duplicates"
+        
+        # Format top duplicates as "Value(count)"
+        dup_strings = []
+        for val, count in duplicates.head(max_items).items():
+            # Truncate long values
+            val_str = str(val)
+            if len(val_str) > 20:
+                val_str = val_str[:17] + "..."
+            dup_strings.append(f"{val_str}({count})")
+        
+        return ", ".join(dup_strings)
+    except Exception as e:
+        return "Error"
+
+
 def safe_get_special_chars(prof):
     try:
         if hasattr(prof, 'special_chars') and prof.special_chars:
@@ -1610,6 +1646,12 @@ def _render_profiles_tab():
                         color = "🔴" if risk == "High" else "🟡" if risk == "Medium" else "🟢"
                         st.write(f"Level: {color} {risk}")
                         st.write(f"Score: {getattr(prof, 'risk_score', 0)}/100")
+
+                    # Show duplicate count values
+                    if prof.unique_count < prof.total_rows:
+                        dup_values_str = get_duplicate_count_values(df, col, max_items=5)
+                        st.markdown("**Duplicate Count Values**")
+                        st.caption(dup_values_str)
 
                     if prof.unique_count < prof.total_rows:
                         dups = find_duplicate_groups(df, col)
@@ -1997,6 +2039,7 @@ def _generate_excel_report():
             profile_data = []
             for col, p in profiles.items():
                 dup_count = p.total_rows - p.unique_count
+                dup_values_str = get_duplicate_count_values(df, col, max_items=5)
                 profile_data.append({
                     'Column Name': col,
                     'Data Type': p.dtype,
@@ -2006,6 +2049,7 @@ def _generate_excel_report():
                     'Null Percentage': f"{p.null_percentage:.2f}%",
                     'Unique Count': p.unique_count,
                     'Duplicate Count': dup_count,
+                    'Duplicate Count Values': dup_values_str,
                     'Unique Percentage': f"{p.unique_percentage:.2f}%",
                     'Min Length': getattr(p, 'min_length', 'N/A'),
                     'Max Length': getattr(p, 'max_length', 'N/A'),
