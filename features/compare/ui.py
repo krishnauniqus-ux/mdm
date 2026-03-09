@@ -1,166 +1,313 @@
-"""Compare Component - Side-by-side data comparison"""
+"""Compare Component - Simple Side-by-Side Data Comparison"""
 
 import streamlit as st
 import pandas as pd
+from typing import List
 
-from state.session import st
+from state.session import st as session_st
 
 
 def render_compare():
-    """Enhanced comparison with change highlighting"""
+    """Simple side-by-side comparison with highlighted changes"""
     
-    state = st.session_state.app_state
+    state = session_st.session_state.app_state
     
     if state.df is None or state.original_df is None:
         st.info("📤 Load data and make changes to use comparison")
         return
     
-    st.markdown('<div class="card">', unsafe_allow_html=True)
-    st.markdown('<div class="card-header">⚖️ Compare: Original vs Modified</div>', unsafe_allow_html=True)
+    # Custom CSS for clean comparison
+    st.markdown("""
+    <style>
+    .compare-container {
+        display: flex;
+        gap: 20px;
+        margin: 20px 0;
+    }
     
-    # Comparison settings
-    settings_col1, settings_col2, settings_col3 = st.columns(3)
+    .data-panel {
+        flex: 1;
+        background: white;
+        border-radius: 8px;
+        padding: 15px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
     
-    with settings_col1:
-        max_rows = st.number_input("Max rows to compare:", 
-                                  min_value=100, max_value=10000, value=1000, step=100)
+    .original-panel {
+        border-left: 4px solid #3b82f6;
+    }
     
-    with settings_col2:
-        highlight_changes = st.checkbox("Highlight changes", value=True)
+    .modified-panel {
+        border-left: 4px solid #10b981;
+    }
     
-    with settings_col3:
-        show_diff_only = st.checkbox("Show changed rows only", value=False)
+    .panel-header {
+        font-size: 18px;
+        font-weight: bold;
+        margin-bottom: 15px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #e5e7eb;
+    }
     
-    # Get comparison data
-    orig_df = state.original_df.head(max_rows)
-    curr_df = state.df.head(max_rows)
+    .stat-row {
+        display: flex;
+        justify-content: space-around;
+        margin: 20px 0;
+        padding: 15px;
+        background: #f9fafb;
+        border-radius: 8px;
+    }
     
-    # Align dataframes for comparison
-    common_cols = list(set(orig_df.columns) & set(curr_df.columns))
+    .stat-item {
+        text-align: center;
+    }
+    
+    .stat-label {
+        font-size: 12px;
+        color: #6b7280;
+        text-transform: uppercase;
+    }
+    
+    .stat-value {
+        font-size: 24px;
+        font-weight: bold;
+        color: #1f2937;
+        margin-top: 5px;
+    }
+    
+    .change-positive {
+        color: #10b981;
+    }
+    
+    .change-negative {
+        color: #ef4444;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+    
+    # Get dataframes
+    orig_df = state.original_df
+    curr_df = state.df
+    
+    # Header
+    st.markdown("## ⚖️ Compare: Original vs Modified")
+    
+    # Quick stats
+    row_change = len(curr_df) - len(orig_df)
+    col_change = len(curr_df.columns) - len(orig_df.columns)
+    
+    st.markdown(f"""
+    <div class="stat-row">
+        <div class="stat-item">
+            <div class="stat-label">Original Rows</div>
+            <div class="stat-value">{len(orig_df):,}</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-label">Modified Rows</div>
+            <div class="stat-value">{len(curr_df):,}</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-label">Row Change</div>
+            <div class="stat-value {'change-positive' if row_change >= 0 else 'change-negative'}">{row_change:+,}</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-label">Original Columns</div>
+            <div class="stat-value">{len(orig_df.columns)}</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-label">Modified Columns</div>
+            <div class="stat-value">{len(curr_df.columns)}</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-label">Column Change</div>
+            <div class="stat-value {'change-positive' if col_change >= 0 else 'change-negative'}">{col_change:+}</div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    st.divider()
     
     # Column selection
-    st.markdown("**Select columns to compare:**")
-    selected_cols = st.multiselect("Columns:", 
-                                  common_cols,
-                                  default=common_cols[:5] if len(common_cols) > 5 else common_cols,
-                                  key="compare_cols")
+    orig_cols = set(orig_df.columns)
+    curr_cols = set(curr_df.columns)
+    common_cols = list(orig_cols & curr_cols)
     
-    if not selected_cols:
-        st.warning("Select at least one column to compare")
+    if not common_cols:
+        st.warning("No common columns found between original and modified data")
         return
     
-    # Perform comparison
-    comparison_df = _create_comparison_view(orig_df, curr_df, selected_cols, highlight_changes, show_diff_only)
-    
-    # Display
-    st.divider()
-    st.markdown("**Comparison View**")
-    
-    if highlight_changes and 'change_status' in comparison_df.columns:
-        # Color code rows
-        def highlight_changes(row):
-            if row['change_status'] == 'MODIFIED':
-                return ['background-color: #fef3c7'] * len(row)
-            elif row['change_status'] == 'NEW':
-                return ['background-color: #d1fae5'] * len(row)
-            elif row['change_status'] == 'DELETED':
-                return ['background-color: #fee2e2'] * len(row)
-            return [''] * len(row)
-        
-        styled_df = comparison_df.style.apply(highlight_changes, axis=1)
-        st.dataframe(styled_df, width="stretch", height=500)
-        
-        # Legend
-        st.markdown("""
-        <div style="display: flex; gap: 20px; margin-top: 10px;">
-            <span style="background: #fef3c7; padding: 4px 8px; border-radius: 4px;">🟡 Modified</span>
-            <span style="background: #d1fae5; padding: 4px 8px; border-radius: 4px;">🟢 New</span>
-            <span style="background: #fee2e2; padding: 4px 8px; border-radius: 4px;">🔴 Deleted</span>
-        </div>
-        """, unsafe_allow_html=True)
-    else:
-        st.dataframe(comparison_df, width="stretch", height=500)
-    
-    # Summary statistics
-    st.divider()
-    _render_comparison_stats(orig_df, curr_df)
-    
-    st.markdown('</div>', unsafe_allow_html=True)
-
-
-def _create_comparison_view(orig_df, curr_df, cols, highlight, diff_only):
-    """Create detailed comparison view"""
-    
-    # For simplicity, compare by index
-    orig_subset = orig_df[cols].copy()
-    curr_subset = curr_df[cols].copy()
-    
-    # Add source indicator
-    orig_subset['_source'] = 'ORIGINAL'
-    curr_subset['_source'] = 'MODIFIED'
-    
-    # Combine for display
-    combined = pd.concat([orig_subset, curr_subset], ignore_index=True)
-    
-    if highlight:
-        # Determine change status (simplified - assumes row order similarity)
-        combined['change_status'] = 'UNCHANGED'
-        
-        # Mark first half as original, second as modified for demo
-        # In real implementation, you'd do proper row matching
-        n_orig = len(orig_subset)
-        combined.loc[:n_orig-1, 'change_status'] = 'ORIGINAL'
-        combined.loc[n_orig:, 'change_status'] = 'MODIFIED'
-    
-    if diff_only and highlight:
-        combined = combined[combined['change_status'] != 'UNCHANGED']
-    
-    return combined
-
-
-def _render_comparison_stats(orig_df, curr_df):
-    """Render comparison statistics"""
-    
-    col1, col2, col3, col4 = st.columns(4)
+    # Settings
+    col1, col2, col3 = st.columns([2, 1, 1])
     
     with col1:
-        st.metric("Original Rows", len(orig_df))
+        selected_cols = st.multiselect(
+            "Select columns to compare:",
+            sorted(common_cols),
+            default=sorted(common_cols)[:10] if len(common_cols) >= 10 else sorted(common_cols),
+            key="compare_cols"
+        )
+    
     with col2:
-        st.metric("Current Rows", len(curr_df), 
-                 delta=f"{len(curr_df) - len(orig_df):+d}")
+        start_row = st.number_input(
+            "Start row:",
+            min_value=0,
+            max_value=max(len(orig_df), len(curr_df)) - 1,
+            value=0,
+            key="start_row"
+        )
+    
     with col3:
-        orig_cols = len(orig_df.columns)
-        curr_cols = len(curr_df.columns)
-        st.metric("Original Columns", orig_cols)
-    with col4:
-        st.metric("Current Columns", curr_cols,
-                 delta=f"{curr_cols - orig_cols:+d}")
+        num_rows = st.number_input(
+            "Rows to show:",
+            min_value=1,
+            max_value=500,
+            value=50,
+            key="num_rows"
+        )
     
-    # Detailed changes
-    st.markdown("**Detailed Changes:**")
+    if not selected_cols:
+        st.warning("Please select at least one column to compare")
+        return
     
-    changes = []
+    st.divider()
     
-    # Row count change
-    row_diff = len(curr_df) - len(orig_df)
-    if row_diff != 0:
-        changes.append(f"• Rows: {row_diff:+,} ({'added' if row_diff > 0 else 'removed'})")
+    # Side-by-side comparison
+    end_row = start_row + num_rows
     
-    # Column changes
-    added_cols = set(curr_df.columns) - set(orig_df.columns)
-    removed_cols = set(orig_df.columns) - set(curr_df.columns)
+    # Prepare data with change detection
+    comparison_data = _prepare_comparison_data(orig_df, curr_df, selected_cols, start_row, end_row)
     
-    if added_cols:
-        changes.append(f"• Columns added: {', '.join(list(added_cols)[:5])}")
-    if removed_cols:
-        changes.append(f"• Columns removed: {', '.join(list(removed_cols)[:5])}")
+    col1, col2 = st.columns(2)
     
-    # Memory change
-    orig_mem = orig_df.memory_usage(deep=True).sum() / 1024 / 1024
-    curr_mem = curr_df.memory_usage(deep=True).sum() / 1024 / 1024
-    mem_diff = curr_mem - orig_mem
+    with col1:
+        st.markdown('<div class="data-panel original-panel">', unsafe_allow_html=True)
+        st.markdown('<div class="panel-header">📘 ORIGINAL DATA</div>', unsafe_allow_html=True)
+        
+        # Display original data
+        orig_display = orig_df[selected_cols].iloc[start_row:end_row].copy()
+        orig_display.insert(0, 'Row', range(start_row, min(end_row, len(orig_df))))
+        
+        st.dataframe(
+            orig_display,
+            use_container_width=True,
+            height=600,
+            hide_index=True
+        )
+        st.markdown('</div>', unsafe_allow_html=True)
     
-    changes.append(f"• Memory: {mem_diff:+.1f} MB ({mem_diff/orig_mem*100:+.1f}%)")
+    with col2:
+        st.markdown('<div class="data-panel modified-panel">', unsafe_allow_html=True)
+        st.markdown('<div class="panel-header">📗 MODIFIED DATA</div>', unsafe_allow_html=True)
+        
+        # Display modified data with highlighting
+        curr_display = curr_df[selected_cols].iloc[start_row:end_row].copy()
+        curr_display.insert(0, 'Row', range(start_row, min(end_row, len(curr_df))))
+        
+        # Apply styling to highlight changes
+        styled_curr = _style_changes(orig_df, curr_df, curr_display, selected_cols, start_row, end_row)
+        
+        st.dataframe(
+            styled_curr,
+            use_container_width=True,
+            height=600,
+            hide_index=True
+        )
+        st.markdown('</div>', unsafe_allow_html=True)
     
-    for change in changes:
-        st.write(change)
+    # Legend
+    st.markdown("""
+    <div style="margin-top: 20px; padding: 15px; background: #f9fafb; border-radius: 8px;">
+        <strong>Legend:</strong>
+        <span style="margin-left: 20px; padding: 4px 12px; background: #fef3c7; border-radius: 4px;">🟡 Modified Value</span>
+        <span style="margin-left: 10px; padding: 4px 12px; background: #d1fae5; border-radius: 4px;">🟢 New Row</span>
+        <span style="margin-left: 10px; padding: 4px 12px; background: #fee2e2; border-radius: 4px;">🔴 Removed Row</span>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Show change summary
+    if comparison_data['changes_found']:
+        st.divider()
+        st.markdown("### 📊 Change Summary")
+        
+        summary_col1, summary_col2, summary_col3 = st.columns(3)
+        
+        with summary_col1:
+            st.metric("Modified Cells", comparison_data['modified_cells'])
+        with summary_col2:
+            st.metric("Added Rows", comparison_data['added_rows'])
+        with summary_col3:
+            st.metric("Removed Rows", comparison_data['removed_rows'])
+
+
+def _prepare_comparison_data(orig_df, curr_df, columns, start_row, end_row):
+    """Prepare comparison data and detect changes"""
+    
+    changes_found = False
+    modified_cells = 0
+    added_rows = 0
+    removed_rows = 0
+    
+    # Check for added/removed rows
+    if end_row > len(orig_df):
+        added_rows = min(end_row, len(curr_df)) - len(orig_df)
+        changes_found = True
+    
+    if end_row > len(curr_df):
+        removed_rows = min(end_row, len(orig_df)) - len(curr_df)
+        changes_found = True
+    
+    # Check for modified cells
+    for idx in range(start_row, min(end_row, len(orig_df), len(curr_df))):
+        for col in columns:
+            orig_val = orig_df.iloc[idx][col]
+            curr_val = curr_df.iloc[idx][col]
+            
+            # Compare values (handle NaN)
+            if pd.isna(orig_val) and pd.isna(curr_val):
+                continue
+            elif orig_val != curr_val:
+                modified_cells += 1
+                changes_found = True
+    
+    return {
+        'changes_found': changes_found,
+        'modified_cells': modified_cells,
+        'added_rows': added_rows,
+        'removed_rows': removed_rows
+    }
+
+
+def _style_changes(orig_df, curr_df, display_df, columns, start_row, end_row):
+    """Apply styling to highlight changes in modified data"""
+    
+    def highlight_cell(row):
+        styles = [''] * len(row)
+        
+        row_idx = row['Row']
+        
+        # Check if row is added (beyond original data)
+        if row_idx >= len(orig_df):
+            return ['background-color: #d1fae5'] * len(row)
+        
+        # Check if row is in current data
+        if row_idx >= len(curr_df):
+            return ['background-color: #fee2e2'] * len(row)
+        
+        # Compare each cell
+        for i, col in enumerate(display_df.columns):
+            if col == 'Row':
+                continue
+            
+            if col in columns and row_idx < len(orig_df) and row_idx < len(curr_df):
+                orig_val = orig_df.iloc[row_idx][col]
+                curr_val = curr_df.iloc[row_idx][col]
+                
+                # Check if value changed
+                if pd.isna(orig_val) and pd.isna(curr_val):
+                    styles[i] = ''
+                elif orig_val != curr_val:
+                    styles[i] = 'background-color: #fef3c7; font-weight: bold'
+        
+        return styles
+    
+    return display_df.style.apply(highlight_cell, axis=1)

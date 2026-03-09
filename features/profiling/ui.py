@@ -1514,40 +1514,545 @@ def _render_executive_dashboard():
 
 
 def _render_overview_tab():
+    """Advanced Enterprise Data Profiling Dashboard with Cyber-Analytics Theme"""
     state = st.session_state.app_state
     profiles = state.column_profiles
     df = state.df
 
-    col1, col2 = st.columns(2)
+    # Custom CSS for Cyber-Analytics Theme
+    st.markdown("""
+    <style>
+    /* Cyber Analytics Theme */
+    .cyber-card {
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        border: 1px solid #9b5cff;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 0 20px rgba(155, 92, 255, 0.3);
+        margin-bottom: 15px;
+    }
+    
+    .kpi-card {
+        background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 100%);
+        border: 2px solid #9b5cff;
+        border-radius: 15px;
+        padding: 20px;
+        text-align: center;
+        box-shadow: 0 0 25px rgba(155, 92, 255, 0.5);
+        transition: all 0.3s ease;
+    }
+    
+    .kpi-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 0 35px rgba(155, 92, 255, 0.8);
+    }
+    
+    .kpi-value {
+        font-size: 32px;
+        font-weight: bold;
+        color: #9b5cff;
+        text-shadow: 0 0 10px rgba(155, 92, 255, 0.8);
+        margin: 10px 0;
+    }
+    
+    .kpi-label {
+        font-size: 14px;
+        color: #c9b6ff;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    
+    .kpi-icon {
+        font-size: 36px;
+        margin-bottom: 10px;
+    }
+    
+    .section-header {
+        color: #9b5cff;
+        font-size: 20px;
+        font-weight: bold;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        margin: 20px 0 15px 0;
+        text-shadow: 0 0 10px rgba(155, 92, 255, 0.6);
+    }
+    </style>
+    """, unsafe_allow_html=True)
 
+    # Prepare profiling data
+    profile_data = []
+    for col, p in profiles.items():
+        dup_count = p.total_rows - p.unique_count
+        dup_values_str = get_duplicate_count_values(df, col, max_items=3)
+        profile_data.append({
+            'Column Name': col,
+            'Data Type': p.dtype,
+            'Total Rows': p.total_rows,
+            'Non-Null Count': p.total_rows - p.null_count,
+            'Null Count': p.null_count,
+            'Null Percentage': p.null_percentage,
+            'Unique Count': p.unique_count,
+            'Duplicate Count': dup_count,
+            'Duplicate Count Values': dup_values_str,
+            'Unique Percentage': p.unique_percentage,
+            'Min Length': getattr(p, 'min_length', 0),
+            'Max Length': getattr(p, 'max_length', 0),
+            'Avg Length': getattr(p, 'avg_length', 0),
+            'Risk Level': getattr(p, 'risk_level', 'Low'),
+            'Risk Score': getattr(p, 'risk_score', 0)
+        })
+    
+    profile_df = pd.DataFrame(profile_data)
+
+    # Calculate KPIs
+    total_cols = len(profiles)
+    total_rows = len(df)
+    avg_null_pct = profile_df['Null Percentage'].mean()
+    high_risk_cols = len(profile_df[profile_df['Risk Level'] == 'High'])
+    duplicate_cols = len(profile_df[profile_df['Duplicate Count'] > 0])
+    
+    # Calculate overall quality score
+    quality_scores = []
+    for _, row in profile_df.iterrows():
+        completeness = 100 - row['Null Percentage']
+        uniqueness = min(100, row['Unique Percentage'] * 1.2) if row['Unique Percentage'] < 100 else 90
+        risk_penalty = row['Risk Score']
+        quality = (completeness * 0.5 + uniqueness * 0.3 + (100 - risk_penalty) * 0.2)
+        quality_scores.append(quality)
+    
+    overall_quality = np.mean(quality_scores) if quality_scores else 0
+
+    # ============================================
+    # TOP SECTION - KPI CARDS
+    # ============================================
+    
+  
+
+    # ============================================
+    # ROW 1 - DATA COMPLETENESS
+    # ============================================
+    st.markdown('<div class="section-header">📈 DATA COMPLETENESS ANALYSIS</div>', unsafe_allow_html=True)
+    
+    col1, col2 = st.columns(2)
+    
     with col1:
-        st.subheader("Data Type Distribution")
-        dtype_counts = {}
-        for p in profiles.values():
-            t = 'Numeric' if any(x in p.dtype for x in ['int', 'float']) else 'DateTime' if 'date' in p.dtype else 'Text' if p.dtype == 'object' else 'Other'
-            dtype_counts[t] = dtype_counts.get(t, 0) + 1
-
-        fig = px.pie(values=list(dtype_counts.values()), names=list(dtype_counts.keys()),
-                    hole=0.4, color_discrete_sequence=px.colors.qualitative.Set3)
-        fig.update_traces(textposition='inside', textinfo='percent+label')
-        st.plotly_chart(fig, use_container_width=True)
-
+        st.markdown("**Non-Null Count by Column**")
+        fig1 = px.bar(
+            profile_df.sort_values('Non-Null Count', ascending=True).tail(15),
+            y='Column Name',
+            x='Non-Null Count',
+            orientation='h',
+            color='Non-Null Count',
+            color_continuous_scale=['#2a1b3d', '#6a3cff', '#9b5cff', '#c9b6ff']
+        )
+        fig1.update_layout(
+            plot_bgcolor='#0a0a0f',
+            paper_bgcolor='#0a0a0f',
+            font_color='#c9b6ff',
+            showlegend=False,
+            height=400
+        )
+        st.plotly_chart(fig1, use_container_width=True)
+    
     with col2:
-        st.subheader("Data Quality by Column")
-        quality_data = []
-        for col, p in profiles.items():
-            comp = getattr(p, 'non_null_percentage', 100)
-            uniq = p.unique_percentage
-            quality_data.append({'Column': col, 'Completeness': comp, 'Uniqueness': uniq})
+        st.markdown("**Non-Null vs Null Distribution**")
+        # Create stacked data
+        stack_data = profile_df[['Column Name', 'Non-Null Count', 'Null Count']].head(15)
+        fig2 = go.Figure()
+        fig2.add_trace(go.Bar(
+            y=stack_data['Column Name'],
+            x=stack_data['Non-Null Count'],
+            name='Non-Null',
+            orientation='h',
+            marker=dict(color='#9b5cff')
+        ))
+        fig2.add_trace(go.Bar(
+            y=stack_data['Column Name'],
+            x=stack_data['Null Count'],
+            name='Null',
+            orientation='h',
+            marker=dict(color='#ff5c5c')
+        ))
+        fig2.update_layout(
+            barmode='stack',
+            plot_bgcolor='#0a0a0f',
+            paper_bgcolor='#0a0a0f',
+            font_color='#c9b6ff',
+            height=400
+        )
+        st.plotly_chart(fig2, use_container_width=True)
 
-        if quality_data:
-            qdf = pd.DataFrame(quality_data).sort_values('Completeness').head(15)
-            fig = px.bar(qdf, x='Column', y=['Completeness', 'Uniqueness'],
-                        barmode='group', color_discrete_sequence=['#10b981', '#3b82f6'])
-            fig.update_layout(xaxis_tickangle=-45, yaxis_title="Percentage")
-            st.plotly_chart(fig, use_container_width=True)
-
+    # ============================================
+    # ROW 2 - DATA DISTRIBUTION
+    # ============================================
+    st.markdown('<div class="section-header">🔢 DATA DISTRIBUTION PATTERNS</div>', unsafe_allow_html=True)
+    
     col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown("**Unique Count Distribution**")
+        fig3 = px.bar(
+            profile_df.sort_values('Unique Count', ascending=False).head(15),
+            x='Column Name',
+            y='Unique Count',
+            color='Unique Count',
+            color_continuous_scale=['#2a1b3d', '#6a3cff', '#9b5cff', '#c9b6ff']
+        )
+        fig3.update_layout(
+            plot_bgcolor='#0a0a0f',
+            paper_bgcolor='#0a0a0f',
+            font_color='#c9b6ff',
+            showlegend=False,
+            height=400,
+            xaxis_tickangle=-45
+        )
+        st.plotly_chart(fig3, use_container_width=True)
+    
+    with col2:
+        st.markdown("**Unique vs Duplicate Counts**")
+        fig4 = go.Figure()
+        fig4.add_trace(go.Bar(
+            x=profile_df['Column Name'].head(15),
+            y=profile_df['Unique Count'].head(15),
+            name='Unique',
+            marker=dict(color='#00ff88')
+        ))
+        fig4.add_trace(go.Bar(
+            x=profile_df['Column Name'].head(15),
+            y=profile_df['Duplicate Count'].head(15),
+            name='Duplicate',
+            marker=dict(color='#ffa500')
+        ))
+        fig4.update_layout(
+            barmode='stack',
+            plot_bgcolor='#0a0a0f',
+            paper_bgcolor='#0a0a0f',
+            font_color='#c9b6ff',
+            height=400,
+            xaxis_tickangle=-45
+        )
+        st.plotly_chart(fig4, use_container_width=True)
+
+    # ============================================
+    # ROW 3 - TREND ANALYSIS
+    # ============================================
+    st.markdown('<div class="section-header">📉 TREND & PATTERN ANALYSIS</div>', unsafe_allow_html=True)
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown("**Risk Score Trend**")
+        fig5 = px.line(
+            profile_df,
+            x='Column Name',
+            y='Risk Score',
+            markers=True,
+            line_shape='spline'
+        )
+        fig5.update_traces(
+            line_color='#9b5cff',
+            marker=dict(size=8, color='#c9b6ff', line=dict(width=2, color='#9b5cff'))
+        )
+        fig5.update_layout(
+            plot_bgcolor='#0a0a0f',
+            paper_bgcolor='#0a0a0f',
+            font_color='#c9b6ff',
+            height=400,
+            xaxis_tickangle=-45
+        )
+        st.plotly_chart(fig5, use_container_width=True)
+    
+    with col2:
+        st.markdown("**Null Percentage Distribution**")
+        fig6 = px.area(
+            profile_df,
+            x='Column Name',
+            y='Null Percentage',
+            line_shape='spline'
+        )
+        fig6.update_traces(
+            fill='tozeroy',
+            line_color='#ff5c5c',
+            fillcolor='rgba(255, 92, 92, 0.3)'
+        )
+        fig6.update_layout(
+            plot_bgcolor='#0a0a0f',
+            paper_bgcolor='#0a0a0f',
+            font_color='#c9b6ff',
+            height=400,
+            xaxis_tickangle=-45
+        )
+        st.plotly_chart(fig6, use_container_width=True)
+
+    # ============================================
+    # ROW 4 - ADVANCED ANALYTICS
+    # ============================================
+    st.markdown('<div class="section-header">🎯 ADVANCED ANALYTICS</div>', unsafe_allow_html=True)
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown("**Unique % vs Null % (Bubble = Duplicate Count)**")
+        fig7 = px.scatter(
+            profile_df,
+            x='Unique Percentage',
+            y='Null Percentage',
+            size='Duplicate Count',
+            color='Risk Score',
+            hover_data=['Column Name'],
+            color_continuous_scale=['#00ff88', '#9b5cff', '#ff5c5c']
+        )
+        fig7.update_layout(
+            plot_bgcolor='#0a0a0f',
+            paper_bgcolor='#0a0a0f',
+            font_color='#c9b6ff',
+            height=400
+        )
+        st.plotly_chart(fig7, use_container_width=True)
+    
+    with col2:
+        st.markdown("**Risk Score Heatmap**")
+        # Create heatmap data
+        heatmap_data = profile_df[['Column Name', 'Risk Score']].head(20)
+        heatmap_matrix = heatmap_data.set_index('Column Name').T
+        
+        fig8 = px.imshow(
+            heatmap_matrix,
+            color_continuous_scale=['#00ff88', '#9b5cff', '#ff5c5c'],
+            aspect='auto'
+        )
+        fig8.update_layout(
+            plot_bgcolor='#0a0a0f',
+            paper_bgcolor='#0a0a0f',
+            font_color='#c9b6ff',
+            height=400
+        )
+        st.plotly_chart(fig8, use_container_width=True)
+
+    # ============================================
+    # ROW 5 - RADAR CHARTS
+    # ============================================
+    st.markdown('<div class="section-header">🕸️ RADAR PATTERN ANALYSIS</div>', unsafe_allow_html=True)
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown("**Risk Level Distribution**")
+        risk_counts = profile_df['Risk Level'].value_counts()
+        fig9 = go.Figure()
+        fig9.add_trace(go.Scatterpolar(
+            r=risk_counts.values,
+            theta=risk_counts.index,
+            fill='toself',
+            line_color='#9b5cff',
+            fillcolor='rgba(155, 92, 255, 0.3)'
+        ))
+        fig9.update_layout(
+            polar=dict(
+                bgcolor='#0a0a0f',
+                radialaxis=dict(gridcolor='#2a1b3d', color='#c9b6ff')
+            ),
+            paper_bgcolor='#0a0a0f',
+            font_color='#c9b6ff',
+            height=400
+        )
+        st.plotly_chart(fig9, use_container_width=True)
+    
+    with col2:
+        st.markdown("**Length Statistics**")
+        avg_lengths = {
+            'Min Length': profile_df['Min Length'].mean(),
+            'Avg Length': profile_df['Avg Length'].mean(),
+            'Max Length': profile_df['Max Length'].mean()
+        }
+        fig10 = go.Figure()
+        fig10.add_trace(go.Scatterpolar(
+            r=list(avg_lengths.values()),
+            theta=list(avg_lengths.keys()),
+            fill='toself',
+            line_color='#00ff88',
+            fillcolor='rgba(0, 255, 136, 0.3)'
+        ))
+        fig10.update_layout(
+            polar=dict(
+                bgcolor='#0a0a0f',
+                radialaxis=dict(gridcolor='#2a1b3d', color='#c9b6ff')
+            ),
+            paper_bgcolor='#0a0a0f',
+            font_color='#c9b6ff',
+            height=400
+        )
+        st.plotly_chart(fig10, use_container_width=True)
+
+    # ============================================
+    # ROW 6 - DONUT CHARTS
+    # ============================================
+    st.markdown('<div class="section-header">🍩 DISTRIBUTION ANALYSIS</div>', unsafe_allow_html=True)
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown("**Data Type Distribution**")
+        dtype_map = profile_df['Data Type'].apply(
+            lambda x: 'Numeric' if any(t in str(x) for t in ['int', 'float']) 
+            else 'DateTime' if 'date' in str(x).lower() 
+            else 'Text' if 'object' in str(x) 
+            else 'Other'
+        )
+        dtype_counts = dtype_map.value_counts()
+        
+        fig11 = go.Figure(data=[go.Pie(
+            labels=dtype_counts.index,
+            values=dtype_counts.values,
+            hole=0.5,
+            marker=dict(colors=['#9b5cff', '#6a3cff', '#c9b6ff', '#ffa500'])
+        )])
+        fig11.update_layout(
+            paper_bgcolor='#0a0a0f',
+            font_color='#c9b6ff',
+            height=400
+        )
+        st.plotly_chart(fig11, use_container_width=True)
+    
+    with col2:
+        st.markdown("**Risk Level Distribution**")
+        risk_counts = profile_df['Risk Level'].value_counts()
+        
+        fig12 = go.Figure(data=[go.Pie(
+            labels=risk_counts.index,
+            values=risk_counts.values,
+            hole=0.5,
+            marker=dict(colors=['#00ff88', '#ffa500', '#ff5c5c'])
+        )])
+        fig12.update_layout(
+            paper_bgcolor='#0a0a0f',
+            font_color='#c9b6ff',
+            height=400
+        )
+        st.plotly_chart(fig12, use_container_width=True)
+
+    # ============================================
+    # ROW 7 - GAUGE CHARTS
+    # ============================================
+    st.markdown('<div class="section-header">⚡ PERFORMANCE GAUGES</div>', unsafe_allow_html=True)
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown("**Overall Data Quality Score**")
+        fig13 = go.Figure(go.Indicator(
+            mode="gauge+number+delta",
+            value=overall_quality,
+            domain={'x': [0, 1], 'y': [0, 1]},
+            title={'text': "Quality Score", 'font': {'color': '#c9b6ff'}},
+            delta={'reference': 80, 'increasing': {'color': "#00ff88"}},
+            gauge={
+                'axis': {'range': [None, 100], 'tickcolor': '#c9b6ff'},
+                'bar': {'color': "#9b5cff"},
+                'bgcolor': "#0a0a0f",
+                'borderwidth': 2,
+                'bordercolor': "#2a1b3d",
+                'steps': [
+                    {'range': [0, 50], 'color': '#ff5c5c'},
+                    {'range': [50, 75], 'color': '#ffa500'},
+                    {'range': [75, 100], 'color': '#00ff88'}
+                ],
+                'threshold': {
+                    'line': {'color': "#c9b6ff", 'width': 4},
+                    'thickness': 0.75,
+                    'value': 90
+                }
+            }
+        ))
+        fig13.update_layout(
+            paper_bgcolor='#0a0a0f',
+            font_color='#c9b6ff',
+            height=400
+        )
+        st.plotly_chart(fig13, use_container_width=True)
+    
+    with col2:
+        st.markdown("**Duplicate Risk Score**")
+        dup_risk = (duplicate_cols / total_cols * 100) if total_cols > 0 else 0
+        
+        fig14 = go.Figure(go.Indicator(
+            mode="gauge+number+delta",
+            value=dup_risk,
+            domain={'x': [0, 1], 'y': [0, 1]},
+            title={'text': "Duplicate Risk", 'font': {'color': '#c9b6ff'}},
+            delta={'reference': 20, 'decreasing': {'color': "#00ff88"}},
+            gauge={
+                'axis': {'range': [None, 100], 'tickcolor': '#c9b6ff'},
+                'bar': {'color': "#ffa500"},
+                'bgcolor': "#0a0a0f",
+                'borderwidth': 2,
+                'bordercolor': "#2a1b3d",
+                'steps': [
+                    {'range': [0, 25], 'color': '#00ff88'},
+                    {'range': [25, 50], 'color': '#ffa500'},
+                    {'range': [50, 100], 'color': '#ff5c5c'}
+                ],
+                'threshold': {
+                    'line': {'color': "#c9b6ff", 'width': 4},
+                    'thickness': 0.75,
+                    'value': 30
+                }
+            }
+        ))
+        fig14.update_layout(
+            paper_bgcolor='#0a0a0f',
+            font_color='#c9b6ff',
+            height=400
+        )
+        st.plotly_chart(fig14, use_container_width=True)
+
+    # ============================================
+    # ROW 8 - BUBBLE SCATTER
+    # ============================================
+    st.markdown('<div class="section-header">💫 SCATTER ANALYTICS</div>', unsafe_allow_html=True)
+    
+    st.markdown("**Unique Count vs Duplicate Count (Bubble = Risk Score)**")
+    fig15 = px.scatter(
+        profile_df,
+        x='Unique Count',
+        y='Duplicate Count',
+        size='Risk Score',
+        color='Risk Level',
+        hover_data=['Column Name', 'Null Percentage'],
+        color_discrete_map={'Low': '#00ff88', 'Medium': '#ffa500', 'High': '#ff5c5c'}
+    )
+    fig15.update_layout(
+        plot_bgcolor='#0a0a0f',
+        paper_bgcolor='#0a0a0f',
+        font_color='#c9b6ff',
+        height=500
+    )
+    st.plotly_chart(fig15, use_container_width=True)
+
+    # ============================================
+    # BOTTOM SECTION - DETAILED TABLE
+    # ============================================
+    st.markdown('<div class="section-header">📋 DETAILED PROFILING TABLE</div>', unsafe_allow_html=True)
+    
+    # Add color coding for risk levels
+    def color_risk(val):
+        if val == 'High':
+            return 'background-color: #ff5c5c; color: white'
+        elif val == 'Medium':
+            return 'background-color: #ffa500; color: white'
+        else:
+            return 'background-color: #00ff88; color: black'
+    
+    styled_df = profile_df.style.applymap(color_risk, subset=['Risk Level'])
+    
+    st.dataframe(
+        styled_df,
+        use_container_width=True,
+        height=400
+    )
+
+
+def _render_profiles_tab():
 
     with col1:
         st.subheader("Missing Data by Column")
